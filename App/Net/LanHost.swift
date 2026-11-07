@@ -113,7 +113,7 @@ final class LanHost {
             let name = String(cString: ptr.pointee.ifa_name)
             guard name.hasPrefix("en") else { continue }
             var host = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-            if getnameinfo(addr, addr.pointee.sa_len, &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST) == 0 {
+            if getnameinfo(addr, socklen_t(addr.pointee.sa_len), &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST) == 0 {
                 result = String(cString: host)
                 if name == "en0" { return result }
             }
