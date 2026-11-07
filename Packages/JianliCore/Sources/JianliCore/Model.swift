@@ -35,7 +35,7 @@ public struct RuleProfile: Codable, Sendable, Hashable {
                 allowPointHu: Bool = false,
                 allowSevenPairs: Bool = true,
                 redAsPizi: Bool = true,
-                playSeconds: Int = 20,
+                playSeconds: Int = 30,
                 claimSeconds: Int = 8,
                 rounds: Int = 8) {
         self.name = name

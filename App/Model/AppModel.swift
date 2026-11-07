@@ -299,8 +299,12 @@ final class AppModel: ObservableObject {
         botTask?.cancel()
         botTask = Task { @MainActor [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 300_000_000)
                 guard let self else { return }
+                // 练习局只有自己一个真人，机器人放慢到 1.2s；多人局 0.9s，看得清出牌
+                let humans = self.snapshot?.players.filter { !$0.isBot }.count ?? 1
+                let interval: UInt64 = humans <= 1 ? 1_200_000_000 : 900_000_000
+                try? await Task.sleep(nanoseconds: interval)
+                if Task.isCancelled { return }
                 self.botStep()
             }
         }

@@ -1,22 +1,26 @@
 import SwiftUI
-import Foundation
+import UIKit
 import JianliCore
 
 enum Theme {
-    static let feltTop = Color(red: 0.075, green: 0.185, blue: 0.155)
-    static let felt = Color(red: 0.048, green: 0.135, blue: 0.115)
-    static let feltDeep = Color(red: 0.022, green: 0.075, blue: 0.065)
+    static let feltTop = Color(red: 0.085, green: 0.205, blue: 0.170)
+    static let felt = Color(red: 0.045, green: 0.128, blue: 0.108)
+    static let feltDeep = Color(red: 0.018, green: 0.062, blue: 0.054)
 
-    static let gold = Color(red: 0.855, green: 0.715, blue: 0.435)
-    static let goldSoft = Color(red: 0.855, green: 0.715, blue: 0.435).opacity(0.30)
+    static let gold = Color(red: 0.870, green: 0.745, blue: 0.475)
+    static let goldDeep = Color(red: 0.640, green: 0.500, blue: 0.255)
+    static let goldSoft = Color(red: 0.870, green: 0.745, blue: 0.475).opacity(0.28)
 
-    static let ivoryTop = Color(red: 0.995, green: 0.975, blue: 0.925)
-    static let ivoryBottom = Color(red: 0.895, green: 0.865, blue: 0.780)
+    static let ivoryTop = Color(red: 1.000, green: 0.988, blue: 0.950)
+    static let ivoryBottom = Color(red: 0.868, green: 0.845, blue: 0.780)
 
     static let ink = Color(red: 0.125, green: 0.140, blue: 0.130)
-    static let dimText = Color.white.opacity(0.52)
-    static let panel = Color.white.opacity(0.055)
-    static let danger = Color(red: 0.80, green: 0.27, blue: 0.22)
+    static let dimText = Color.white.opacity(0.55)
+    static let panel = Color.white.opacity(0.06)
+    static let danger = Color(red: 0.870, green: 0.360, blue: 0.300)
+
+    /// 红中皮子专用色
+    static let redDragon = Color(red: 0.72, green: 0.20, blue: 0.16)
 
     static func suit(_ suit: TileSuit) -> Color { Color(hex: suit.hexColor) }
 }
@@ -35,142 +39,192 @@ extension Color {
     }
 }
 
-/// 横屏尺寸适配：以 iPhone 16 Pro Max 横屏（932×430pt）为设计基准，
-/// 小屏（874×402、852×393）按比例收缩，最小可到 667×375 也不挤爆。
+// MARK: - 牌面素材
+
+/// 用真实牌面 PNG（开源 CC0 素材 Pack：FluffyStuff/riichi-mahjong-tiles）铺在自绘牌身上
+enum TileArt {
+    static func assetName(_ tile: Tile) -> String {
+        if tile.isRed { return "Chun" }
+        let prefix: String
+        switch tile.suit {
+        case .wan: prefix = "Man"
+        case .tong: prefix = "Pin"
+        case .tiao: prefix = "Sou"
+        case .red: prefix = "Chun"
+        }
+        return "\(prefix)\(tile.rank)"
+    }
+
+    static func image(_ tile: Tile) -> UIImage? { UIImage(named: assetName(tile)) }
+}
+
+// MARK: - 尺寸
+
 struct Metrics {
     let size: CGSize
 
-    var scale: CGFloat { min(size.width / 932, size.height / 430) }
+    /// 667×375 这一档（SE / 13 mini）单独收紧
+    var isCompact: Bool { size.width < 720 }
 
-    /// iPhone SE / 13 mini 这一档：667×375 横屏，单独一版压缩规则
-    var isCompact: Bool { size.width < 700 }
-
-    /// 底部自己手牌：优先保证 14 张不换行、不再缩
-    var handTile: CGSize {
-        let widthLimit = (size.width - (isCompact ? 40 : 56)) / 14
-        let width = min(widthLimit, size.height * (isCompact ? 0.215 : 0.205))
-        return CGSize(width: floor(width), height: floor(width * 4 / 3))
+    /// 牌高：随屏高定，最大 84，比上一版整体小一档
+    var handTileHeight: CGFloat {
+        floor(min(size.height * (isCompact ? 0.185 : 0.195), isCompact ? 70 : 84))
     }
+
+    var handTile: CGSize {
+        let h = handTileHeight
+        return CGSize(width: floor(h * 0.72), height: h)
+    }
+
+    /// 手牌之间略带重叠，14 张一行放得下
+    var handSpacing: CGFloat { -handTile.width * 0.10 }
 
     var riverTile: CGSize {
-        let w = floor(handTile.width * 0.60)
-        return CGSize(width: w, height: floor(w * 4 / 3))
+        let h = floor(handTileHeight * (isCompact ? 0.44 : 0.46))
+        return CGSize(width: floor(h * 0.72), height: h)
     }
 
-    var sideTile: CGSize {
-        let w = floor(handTile.width * 0.38)
-        return CGSize(width: w, height: floor(w * 4 / 3))
+    var meldTile: CGSize {
+        let h = floor(handTileHeight * 0.48)
+        return CGSize(width: floor(h * 0.72), height: h)
     }
 
-    var topBackTile: CGSize {
-        let w = floor(handTile.width * (isCompact ? 0.46 : 0.52))
-        return CGSize(width: w, height: floor(w * 4 / 3))
+    var backTile: CGSize {
+        let h = floor(handTileHeight * 0.58)
+        return CGSize(width: floor(h * 0.72), height: h)
     }
 
-    var handAreaHeight: CGFloat { handTile.height + (isCompact ? 28 : 34) }
-    var topAreaHeight: CGFloat { topBackTile.height + (isCompact ? 24 : 30) }
+    var sideBackTile: CGSize { backTile }
+
+    var riverColumns: Int { isCompact ? 9 : 10 }
+    var sideRiverRows: Int { isCompact ? 5 : 6 }
+
+    var hubSide: CGFloat { floor(min(size.height * (isCompact ? 0.155 : 0.175), 76)) }
+
+    var outer: CGFloat { isCompact ? 8 : 12 }
 }
 
-// MARK: - 牌
+// MARK: - 单张牌
 
 struct MahjongTileView: View {
     let tile: Tile
     let size: CGSize
     var lifted: Bool = false
     var highlighted: Bool = false
+    /// 侧家牌河 / 牌背用 90 或 -90 把牌横过来
+    var rotation: Double = 0
 
-    private var corner: CGFloat { max(4, size.width * 0.15) }
+    private var corner: CGFloat { max(3, size.width * 0.13) }
+    private var edge: CGFloat { max(1.5, size.height * 0.045) }
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: corner, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: corner, style: .continuous)
+        ZStack(alignment: .top) {
+            // 牌身（下半截露出的厚度，做出实体感）
+            shape
+                .fill(LinearGradient(colors: [Color(red: 0.760, green: 0.735, blue: 0.660),
+                                              Color(red: 0.640, green: 0.615, blue: 0.545)],
+                                     startPoint: .top, endPoint: .bottom))
+                .offset(y: edge)
+
+            // 牌面
+            shape
                 .fill(LinearGradient(colors: [Theme.ivoryTop, Theme.ivoryBottom],
                                      startPoint: .top, endPoint: .bottom))
-            RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(highlighted ? Theme.gold : Color.black.opacity(0.16),
-                              lineWidth: highlighted ? max(1.5, size.width * 0.035) : 0.7)
-            face
+                .overlay(
+                    Image(TileArt.assetName(tile))
+                        .resizable()
+                        .interpolation(.high)
+                        .scaledToFit()
+                        .padding(.horizontal, size.width * 0.085)
+                        .padding(.vertical, size.height * 0.075)
+                )
+                .overlay(
+                    shape.strokeBorder(
+                        highlighted ? Theme.gold : Color.black.opacity(0.13),
+                        lineWidth: highlighted ? max(1.6, size.width * 0.045) : 0.6
+                    )
+                )
         }
-        .frame(width: size.width, height: size.height)
-        .shadow(color: .black.opacity(0.42), radius: size.width * 0.09, x: 0, y: size.height * 0.05)
-        .offset(y: lifted ? -size.height * 0.13 : 0)
-        .animation(.spring(response: 0.28, dampingFraction: 0.82), value: lifted)
-    }
-
-    @ViewBuilder
-    private var face: some View {
-        if tile.isRed {
-            Text("中")
-                .font(.system(size: size.width * 0.72, weight: .black, design: .serif))
-                .foregroundStyle(Theme.suit(.red))
-                .minimumScaleFactor(0.4)
-                .padding(.bottom, size.height * 0.02)
-        } else {
-            VStack(spacing: -size.height * 0.035) {
-                Text(tile.numeral)
-                    .font(.system(size: size.width * 0.44, weight: .bold, design: .serif))
-                    .foregroundStyle(Theme.suit(tile.suit))
-                Text(tile.symbol)
-                    .font(.system(size: size.width * 0.40, weight: .semibold, design: .serif))
-                    .foregroundStyle(Theme.suit(tile.suit).opacity(0.92))
-            }
-            .minimumScaleFactor(0.4)
-            .lineLimit(1)
-        }
+        .frame(width: size.width, height: size.height + edge)
+        .rotationEffect(.degrees(rotation))
+        .rotationEffect(.degrees(0))
+        .shadow(color: .black.opacity(0.45), radius: max(1.5, size.width * 0.075),
+                x: 0, y: max(1, size.height * 0.055))
+        .offset(y: lifted ? -size.height * 0.14 : 0)
+        .animation(.spring(response: 0.26, dampingFraction: 0.80), value: lifted)
     }
 }
 
 struct TileBackView: View {
     let size: CGSize
+    var rotation: Double = 0
+
     var body: some View {
-        RoundedRectangle(cornerRadius: max(3, size.width * 0.13), style: .continuous)
-            .fill(LinearGradient(colors: [Color(red: 0.10, green: 0.28, blue: 0.24),
-                                          Color(red: 0.06, green: 0.19, blue: 0.16)],
-                                 startPoint: .topLeading, endPoint: .bottomTrailing))
-            .overlay(
-                Canvas { context, canvasSize in
-                    let step = canvasSize.width * 0.30
-                    var offset = -canvasSize.height
-                    while offset < canvasSize.width + canvasSize.height {
-                        var path = Path()
-                        path.move(to: CGPoint(x: offset, y: canvasSize.height))
-                        path.addLine(to: CGPoint(x: offset + canvasSize.height, y: 0))
-                        context.stroke(path, with: .color(.white.opacity(0.07)), lineWidth: 1)
-                        offset += step
+        let corner = max(3, size.width * 0.13)
+        let shape = RoundedRectangle(cornerRadius: corner, style: .continuous)
+        ZStack(alignment: .top) {
+            shape
+                .fill(LinearGradient(colors: [Color(red: 0.760, green: 0.735, blue: 0.660),
+                                              Color(red: 0.620, green: 0.595, blue: 0.525)],
+                                     startPoint: .top, endPoint: .bottom))
+                .offset(y: max(1.5, size.height * 0.045))
+
+            shape
+                .fill(LinearGradient(colors: [Color(red: 0.115, green: 0.310, blue: 0.255),
+                                              Color(red: 0.055, green: 0.185, blue: 0.155)],
+                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay(
+                    Canvas { context, canvasSize in
+                        let inset: CGFloat = 2
+                        let rect = CGRect(x: inset, y: inset,
+                                          width: canvasSize.width - inset * 2,
+                                          height: canvasSize.height - inset * 2)
+                        context.stroke(Path(roundedRect: rect, cornerRadius: corner * 0.7),
+                                       with: .color(.white.opacity(0.10)), lineWidth: 0.7)
+                        let step = max(3, canvasSize.height * 0.12)
+                        var y = -canvasSize.width
+                        while y < canvasSize.height {
+                            var path = Path()
+                            path.move(to: CGPoint(x: 0, y: y))
+                            path.addLine(to: CGPoint(x: canvasSize.width, y: y + canvasSize.width))
+                            context.stroke(path, with: .color(.white.opacity(0.055)), lineWidth: 0.8)
+                            y += step
+                        }
                     }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: max(3, size.width * 0.13), style: .continuous))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: max(3, size.width * 0.13), style: .continuous)
-                    .strokeBorder(Theme.gold.opacity(0.28), lineWidth: 0.8)
-            )
-            .frame(width: size.width, height: size.height)
-            .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 1)
+                    .clipShape(shape)
+                )
+                .overlay(shape.strokeBorder(Color.black.opacity(0.20), lineWidth: 0.5))
+        }
+        .frame(width: size.width, height: size.height)
+        .rotationEffect(.degrees(rotation))
+        .shadow(color: .black.opacity(0.40), radius: max(1.5, size.width * 0.07),
+                x: 0, y: max(1, size.height * 0.05))
     }
 }
 
-/// 侧家牌背：竖着叠起来，只露一条边，省高度
-struct SideHandView: View {
+/// 对手手里的牌背：一排叠着，只露一条边
+struct OpponentBacks: View {
     let count: Int
     let tile: CGSize
-    let vertical: Bool
+    var horizontal: Bool = true
+
     var body: some View {
-        let overlap = tile.height * 0.30
-        let total = vertical ? CGFloat(count) * overlap + (tile.height - overlap)
-                            : CGFloat(count) * (tile.width * 0.34)
-        ZStack(alignment: vertical ? .top : .leading) {
+        let overlap = horizontal ? tile.width * 0.42 : tile.height * 0.42
+        let span = CGFloat(max(0, count - 1)) * overlap + (horizontal ? tile.width : tile.height)
+        ZStack(alignment: horizontal ? .leading : .top) {
             ForEach(0..<max(0, count), id: \.self) { index in
-                if vertical {
+                if horizontal {
                     TileBackView(size: tile)
-                        .offset(y: CGFloat(index) * overlap)
+                        .offset(x: CGFloat(index) * overlap)
                 } else {
-                    TileBackView(size: tile)
-                        .offset(x: CGFloat(index) * tile.width * 0.34)
+                    TileBackView(size: tile, rotation: 90)
+                        .offset(y: CGFloat(index) * overlap)
                 }
             }
         }
-        .frame(width: vertical ? tile.width : total,
-               height: vertical ? total : tile.height)
+        .frame(width: horizontal ? span : tile.height,
+               height: horizontal ? tile.height : span,
+               alignment: horizontal ? .leading : .top)
     }
 }

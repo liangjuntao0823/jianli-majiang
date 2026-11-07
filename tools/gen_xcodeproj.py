@@ -25,21 +25,46 @@ def sources():
     return sorted(str(p.relative_to(APP)) for p in APP.rglob("*.swift"))
 
 
+def resources():
+    """牌面 PNG 等资源，逐个挂进 Resources 阶段，落到 bundle 根目录"""
+    return sorted(str(p.relative_to(APP)) for p in APP.rglob("*.png"))
+
+
 def build():
     files = sources()
     refs = {f: oid("ref:" + f) for f in files}
     builds = {f: oid("build:" + f) for f in files}
+    res = resources()
+    res_refs = {f: oid("ref:" + f) for f in res}
+    res_builds = {f: oid("buildres:" + f) for f in res}
 
     file_ref_lines = "\n".join(
         f'\t\t{refs[f]} /* {os.path.basename(f)} */ = {{isa = PBXFileReference; '
         f'lastKnownFileType = sourcecode.swift; path = "{f}"; sourceTree = "<group>"; }};'
         for f in files
     )
+    if res:
+        file_ref_lines += "\n" + "\n".join(
+            f'\t\t{res_refs[f]} /* {os.path.basename(f)} */ = {{isa = PBXFileReference; '
+            f'lastKnownFileType = image.png; path = "{f}"; sourceTree = "<group>"; }};'
+            for f in res
+        )
     build_file_lines = "\n".join(
         f'\t\t{builds[f]} /* {os.path.basename(f)} in Sources */ = {{isa = PBXBuildFile; '
         f'fileRef = {refs[f]} /* {os.path.basename(f)} */; }};'
         for f in files
     )
+    resource_build_lines = "\n".join(
+        f'\t\t\t\t{res_builds[f]} /* {os.path.basename(f)} in Resources */,'
+        for f in res
+    )
+    resource_build_defs = "\n".join(
+        f'\t\t{res_builds[f]} /* {os.path.basename(f)} in Resources */ = {{isa = PBXBuildFile; '
+        f'fileRef = {res_refs[f]} /* {os.path.basename(f)} */; }};'
+        for f in res
+    )
+    if resource_build_defs:
+        build_file_lines += "\n" + resource_build_defs
 
     product_ref = oid("product")
     plist_ref = oid("ref:Info.plist")
@@ -64,6 +89,10 @@ def build():
     app_children = "\n".join(
         f'\t\t\t\t{refs[f]} /* {os.path.basename(f)} */,' for f in files
     )
+    if res:
+        app_children += "\n" + "\n".join(
+            f'\t\t\t\t{res_refs[f]} /* {os.path.basename(f)} */,' for f in res
+        )
 
     common = """\t\t\t\tALWAYS_SEARCH_USER_PATHS = NO;
 \t\t\t\tCLANG_ANALYZER_NONNULL = YES;
@@ -215,6 +244,7 @@ def build():
 \t\t\tisa = PBXResourcesBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
+{resource_build_lines}
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
