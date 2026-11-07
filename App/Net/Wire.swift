@@ -72,5 +72,6 @@ enum HostMessage: Codable {
     case room(RoomInfo, [SlotInfo])
     case snapshot(TableSnapshot)
     case toast(String)
+    case ended(String)
     case pong
 }

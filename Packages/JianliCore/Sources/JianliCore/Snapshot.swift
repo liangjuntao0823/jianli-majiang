@@ -36,6 +36,7 @@ public struct TableSnapshot: Codable, Sendable {
     public var phase: Phase
     public var wallRemaining: Int
     public var lastDrawn: Tile?
+    public var lastDrawnFromTail: Bool
     public var dealer: Seat
     public var roundIndex: Int
     public var totalRounds: Int
@@ -52,6 +53,8 @@ public struct TableSnapshot: Codable, Sendable {
     public var waitingTiles: [Tile]
     public var ruleName: String
     public var redGangDone: Bool
+    public var playSeconds: Int
+    public var claimSeconds: Int
 
     public var me: SeatView { players[you.rawValue] }
     public var totalRedsPlayed: Int { players.reduce(0) { $0 + $1.redsPlayed } }
@@ -62,6 +65,7 @@ public struct TableSnapshot: Codable, Sendable {
                 phase: Phase,
                 wallRemaining: Int,
                 lastDrawn: Tile?,
+                lastDrawnFromTail: Bool,
                 dealer: Seat,
                 roundIndex: Int,
                 totalRounds: Int,
@@ -76,13 +80,16 @@ public struct TableSnapshot: Codable, Sendable {
                 drawnGame: Bool,
                 waitingTiles: [Tile],
                 ruleName: String,
-                redGangDone: Bool) {
+                redGangDone: Bool,
+                playSeconds: Int,
+                claimSeconds: Int) {
         self.you = you
         self.players = players
         self.current = current
         self.phase = phase
         self.wallRemaining = wallRemaining
         self.lastDrawn = lastDrawn
+        self.lastDrawnFromTail = lastDrawnFromTail
         self.dealer = dealer
         self.roundIndex = roundIndex
         self.totalRounds = totalRounds
@@ -98,6 +105,8 @@ public struct TableSnapshot: Codable, Sendable {
         self.waitingTiles = waitingTiles
         self.ruleName = ruleName
         self.redGangDone = redGangDone
+        self.playSeconds = playSeconds
+        self.claimSeconds = claimSeconds
     }
 }
 
@@ -147,6 +156,7 @@ extension MahjongEngine {
                              phase: state.phase,
                              wallRemaining: state.wall.remaining,
                              lastDrawn: state.lastDrawn,
+                             lastDrawnFromTail: state.lastDrawnFromTail,
                              dealer: state.dealer,
                              roundIndex: state.roundIndex,
                              totalRounds: rule.rounds,
@@ -161,6 +171,8 @@ extension MahjongEngine {
                              drawnGame: state.drawnGame,
                              waitingTiles: waiting,
                              ruleName: rule.name,
-                             redGangDone: me.redsPlayed >= 4)
+                             redGangDone: me.redsPlayed >= 4,
+                             playSeconds: rule.playSeconds,
+                             claimSeconds: rule.claimSeconds)
     }
 }

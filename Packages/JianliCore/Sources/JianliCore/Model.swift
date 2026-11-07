@@ -228,6 +228,8 @@ public struct GameState: Codable, Sendable {
     public var roundIndex: Int
     public var pending: PendingClaim?
     public var lastDrawn: Tile?
+    /// 这一张是否从牌墙尾补摸（打红中、杠后补牌）
+    public var lastDrawnFromTail: Bool
     public var winner: Seat?
     public var drawnGame: Bool
     public var result: HandResult?
@@ -242,6 +244,7 @@ public struct GameState: Codable, Sendable {
         self.roundIndex = roundIndex
         self.pending = nil
         self.lastDrawn = nil
+        self.lastDrawnFromTail = false
         self.winner = nil
         self.drawnGame = false
         self.result = nil

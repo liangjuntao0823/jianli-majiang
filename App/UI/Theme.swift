@@ -42,10 +42,13 @@ struct Metrics {
 
     var scale: CGFloat { min(size.width / 932, size.height / 430) }
 
+    /// iPhone SE / 13 mini 这一档：667×375 横屏，单独一版压缩规则
+    var isCompact: Bool { size.width < 700 }
+
     /// 底部自己手牌：优先保证 14 张不换行、不再缩
     var handTile: CGSize {
-        let widthLimit = (size.width - 56) / 14
-        let width = min(widthLimit, size.height * 0.205)
+        let widthLimit = (size.width - (isCompact ? 40 : 56)) / 14
+        let width = min(widthLimit, size.height * (isCompact ? 0.215 : 0.205))
         return CGSize(width: floor(width), height: floor(width * 4 / 3))
     }
 
@@ -60,12 +63,12 @@ struct Metrics {
     }
 
     var topBackTile: CGSize {
-        let w = floor(handTile.width * 0.52)
+        let w = floor(handTile.width * (isCompact ? 0.46 : 0.52))
         return CGSize(width: w, height: floor(w * 4 / 3))
     }
 
-    var handAreaHeight: CGFloat { handTile.height + 34 }
-    var topAreaHeight: CGFloat { topBackTile.height + 30 }
+    var handAreaHeight: CGFloat { handTile.height + (isCompact ? 28 : 34) }
+    var topAreaHeight: CGFloat { topBackTile.height + (isCompact ? 24 : 30) }
 }
 
 // MARK: - 牌

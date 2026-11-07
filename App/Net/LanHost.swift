@@ -1,5 +1,6 @@
 import Foundation
 import Network
+import Darwin
 import JianliCore
 
 /// 房主端的 TCP 服务：监听 + Bonjour 广播 + 帧收发。只做搬运，不含任何规则。
@@ -17,6 +18,9 @@ final class LanHost {
     var onIncoming: ((Incoming) -> Void)?
     var onState: ((String) -> Void)?
 
+    /// 固定端口：Bonjour 被网络策略挡住时，客户端可以按 IP 直连
+    static let port: UInt16 = 45910
+
     private let queue = DispatchQueue(label: "jianli.lan.host")
     private var listener: NWListener?
     private var connections: [UUID: NWConnection] = [:]
@@ -27,7 +31,12 @@ final class LanHost {
         do {
             let parameters = NWParameters.tcp
             parameters.includePeerToPeer = true
-            let listener = try NWListener(using: parameters)
+            let listener: NWListener
+            if let fixed = NWEndpoint.Port(rawValue: Self.port), let onFixed = try? NWListener(using: parameters, on: fixed) {
+                listener = onFixed
+            } else {
+                listener = try NWListener(using: parameters)
+            }
             listener.service = NWListener.Service(name: serviceName, type: "_jianli._tcp")
             listener.newConnectionHandler = { [weak self] connection in
                 self?.accept(connection)
@@ -87,6 +96,29 @@ final class LanHost {
             self?.connections[peer] = nil
             self?.buffers[peer] = nil
         }
+    }
+
+    /// 本机在 Wi-Fi / 蜂窝上的 IPv4，房主用来念给客人听
+    static func localIPv4() -> String? {
+        var result: String?
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        guard getifaddrs(&ifaddr) == 0, let first = ifaddr else { return nil }
+        defer { freeifaddrs(ifaddr) }
+        for ptr in sequence(first: first, next: { $0.pointee.ifa_next }) {
+            let flags = Int32(ptr.pointee.ifa_flags)
+            guard let addr = ptr.pointee.ifa_addr,
+                  addr.pointee.sa_family == UInt8(AF_INET),
+                  (flags & (IFF_UP | IFF_RUNNING)) != 0,
+                  (flags & IFF_LOOPBACK) == 0 else { continue }
+            let name = String(cString: ptr.pointee.ifa_name)
+            guard name.hasPrefix("en") else { continue }
+            var host = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+            if getnameinfo(addr, addr.pointee.sa_len, &host, socklen_t(host.count), nil, 0, NI_NUMERICHOST) == 0 {
+                result = String(cString: host)
+                if name == "en0" { return result }
+            }
+        }
+        return result
     }
 
     // MARK: - 内部

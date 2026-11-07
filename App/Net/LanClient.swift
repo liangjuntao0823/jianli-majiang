@@ -8,12 +8,14 @@ final class LanClient {
     var onRooms: (([DiscoveredRoom]) -> Void)?
     var onMessage: ((HostMessage) -> Void)?
     var onState: ((String) -> Void)?
+    var onDisconnect: (() -> Void)?
 
     private let queue = DispatchQueue(label: "jianli.lan.client")
     private var browser: NWBrowser?
     private var connection: NWConnection?
     private var buffer: [UInt8] = []
     private var results: [String: NWBrowser.Result] = [:]
+    private var isStopping = false
 
     func startBrowsing() {
         stop()
@@ -57,12 +59,14 @@ final class LanClient {
             guard let self else { return }
             switch state {
             case .ready:
+                self.isStopping = false
                 self.sendNow(hello)
                 DispatchQueue.main.async { self.onState?("已连上房主") }
             case .failed(let error):
                 DispatchQueue.main.async { self.onState?("连接失败：\(error.localizedDescription)") }
+                if !self.isStopping { DispatchQueue.main.async { self.onDisconnect?() } }
             case .cancelled:
-                DispatchQueue.main.async { self.onState?("连接已断开") }
+                if !self.isStopping { DispatchQueue.main.async { self.onDisconnect?() } }
             default:
                 break
             }
@@ -77,7 +81,34 @@ final class LanClient {
         }
     }
 
+    func connectManually(host: String, port: UInt16, hello: ClientMessage) {
+        stop()
+        let parameters = NWParameters.tcp
+        parameters.includePeerToPeer = true
+        guard let nwPort = NWEndpoint.Port(rawValue: port) else { return }
+        let connection = NWConnection(host: NWEndpoint.Host(host), port: nwPort, using: parameters)
+        self.connection = connection
+        buffer = []
+        connection.stateUpdateHandler = { [weak self] state in
+            guard let self else { return }
+            switch state {
+            case .ready:
+                self.isStopping = false
+                self.sendNow(hello)
+                DispatchQueue.main.async { self.onState?("已直连房主 \(host)") }
+            case .failed(let error):
+                DispatchQueue.main.async { self.onState?("直连失败：\(error.localizedDescription)") }
+                if !self.isStopping { DispatchQueue.main.async { self.onDisconnect?() } }
+            default:
+                break
+            }
+        }
+        connection.start(queue: queue)
+        receive(on: connection)
+    }
+
     func stop() {
+        isStopping = true
         browser?.cancel()
         browser = nil
         connection?.cancel()

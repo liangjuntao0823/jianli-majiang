@@ -4,6 +4,7 @@ import JianliCore
 
 struct RoomView: View {
     @EnvironmentObject private var model: AppModel
+    @State private var manualHost: String = ""
 
     var body: some View {
         GeometryReader { geo in
@@ -54,6 +55,7 @@ struct RoomView: View {
             } else {
                 seatGrid
             }
+            connectionHelper
 
             Spacer(minLength: 0)
 
@@ -66,6 +68,68 @@ struct RoomView: View {
         }
         .frame(width: width, alignment: .leading)
         .padding(.trailing, 24)
+    }
+
+    /// 房主给 IP，客人可手填；顺带解释「为什么搜不到」
+    private var connectionHelper: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if model.roomMode == .host {
+                HStack(spacing: 8) {
+                    Text("直连地址")
+                        .font(.system(size: 10))
+                        .foregroundStyle(Theme.dimText)
+                    Text(model.localIP.isEmpty ? "未获取到 Wi-Fi 地址" : "\(model.localIP):\(LanHost.port)")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundStyle(model.localIP.isEmpty ? Theme.dimText : Theme.gold.opacity(0.9))
+                    if !model.localIP.isEmpty {
+                        Button {
+                            UIPasteboard.general.string = "\(model.localIP):\(LanHost.port)"
+                            model.toast = "地址已复制"
+                        } label: {
+                            Text("复制")
+                                .font(.system(size: 10))
+                                .padding(.horizontal, 8).padding(.vertical, 3)
+                                .background(Capsule().fill(Theme.panel))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            } else {
+                HStack(spacing: 8) {
+                    TextField("房主屏幕上的 IP", text: $manualHost)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 11, design: .monospaced))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .frame(width: 160)
+                        .padding(.horizontal, 10).padding(.vertical, 5)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.07)))
+                    Button {
+                        model.manualJoin(hostIP: manualHost)
+                    } label: {
+                        Text("直连")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(Theme.feltDeep)
+                            .padding(.horizontal, 14).padding(.vertical, 5)
+                            .background(Capsule().fill(Theme.gold))
+                    }
+                    .buttonStyle(.plain)
+                    Button {
+                        model.beginJoining()
+                    } label: {
+                        Text("重新扫描")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.white.opacity(0.75))
+                            .padding(.horizontal, 12).padding(.vertical, 5)
+                            .background(Capsule().fill(Color.white.opacity(0.08)))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            Text("搜不到房间：确认四台设备在同一 Wi-Fi；如果连的是咖啡店或酒店网络，多半开了「客户端隔离」，改成房主手机开热点即可。首次连接会弹「本地网络」权限，点允许。")
+                .font(.system(size: 9))
+                .foregroundStyle(Theme.dimText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     private var seatGrid: some View {
