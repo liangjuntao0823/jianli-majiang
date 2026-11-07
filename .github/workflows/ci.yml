@@ -11,7 +11,7 @@ permissions:
 jobs:
   test:
     name: 规则引擎单测
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - run: swift --version
@@ -19,7 +19,7 @@ jobs:
 
   ipa:
     name: 编译并打包 ipa（不签名）
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 
