@@ -49,7 +49,9 @@ final class RuleTests: XCTestCase {
                     t(.tiao, 7), t(.tiao, 8), t(.tiao, 9),
                     t(.tiao, 9), t(.tiao, 9)]
         XCTAssertTrue(WinChecker.isWinning(hand: hand, melds: []))
-        XCTAssertEqual(WinChecker.waitingTiles(hand: Array(hand.dropLast()), melds: []).count, 1)
+        // 去掉最后一张 9 条后，6 条和 9 条都能和
+        let waits = WinChecker.waitingTiles(hand: Array(hand.dropLast()), melds: [])
+        XCTAssertEqual(Set(waits), Set([t(.tiao, 6), t(.tiao, 9)]))
     }
 
     func testSevenPairs() {
@@ -142,7 +144,7 @@ final class RuleTests: XCTestCase {
 
     func testPointGangPaidByDiscarderOnly() throws {
         var state = baseState(hands: [
-            [t(.wan, 2), t(.wan, 3), t(.wan, 4), t(.wan, 5), t(.wan, 6), t(.wan, 7), t(.wan, 8), t(.wan, 9), t(.tong, 1), t(.tong, 2), t(.tong, 3), t(.tong, 4), t(.tong, 5)],
+            [t(.wan, 1), t(.wan, 2), t(.wan, 3), t(.wan, 4), t(.wan, 5), t(.wan, 6), t(.wan, 7), t(.wan, 8), t(.wan, 9), t(.tong, 1), t(.tong, 2), t(.tong, 3), t(.tong, 4)],
             [t(.wan, 1), t(.wan, 1), t(.wan, 1), t(.tong, 5), t(.tong, 6), t(.tong, 7), t(.tiao, 2), t(.tiao, 3), t(.tiao, 4), t(.tiao, 6), t(.tiao, 7), t(.tiao, 8), t(.tiao, 9)],
             [], []
         ])
@@ -152,7 +154,6 @@ final class RuleTests: XCTestCase {
         _ = try mut.apply(.discard(t(.wan, 1)), by: .east)
 
         XCTAssertEqual(mut.state.phase, .awaitingClaim)
-        _ = try mut.apply(.pass, by: .west)
         _ = try mut.apply(.gangExposed, by: .south)
 
         XCTAssertEqual(mut.state.players[1].score, 10)
@@ -209,7 +210,7 @@ final class RuleTests: XCTestCase {
     }
 
     private func runBots(seed: UInt64) throws -> MahjongEngine {
-        var engine = MahjongEngine(seed: seed, names: ["A", "B", "C", "D"], botSeats: Set(Seat.allCases), dealer: .east)
+        var engine = MahjongEngine(seed: seed, names: ["A", "B", "C", "D"], dealer: .east, botSeats: Set(Seat.allCases))
         engine.startHand()
 
         var steps = 0

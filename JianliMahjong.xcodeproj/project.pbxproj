@@ -1,0 +1,303 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E4FFB9C7FD1ECA6D8A277EF9 /* JianliMahjongApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0DB84C09C612FA6FF238F9C /* JianliMahjongApp.swift */; };
+		43D652F88621EEE3500FACA6 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B81638B3F393962081A1B5A1 /* AppModel.swift */; };
+		A813DA537DEA15910CD577CB /* LanClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F740845B049892A8A98A8F29 /* LanClient.swift */; };
+		0BAEE61001160F889776B158 /* LanHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B7D56E309D0D18A942D51F5 /* LanHost.swift */; };
+		854D6C2B37E247DA0DA2ABF3 /* Wire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 534923C378FE14C96B16F898 /* Wire.swift */; };
+		ECD1269803F379E5A8E93341 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D065FDB56A1018194F6CD49C /* HomeView.swift */; };
+		B0E5308C47D4F25EAA28088E /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D100E0CAADEB938ABA09ABBA /* RoomView.swift */; };
+		F7342AECEBD9B0D97FBAF234 /* SettlementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D069C180F5FF8551DCCFFA /* SettlementView.swift */; };
+		B90D8AF802A19AD1DF66DF3B /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D056D0F91645923D9DB7D52C /* TableView.swift */; };
+		82B3A16A629F6329B595DDFA /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FE040F4F7A3752C1E9CC220 /* Theme.swift */; };
+		39CA2D6E8E1399CA430452B7 /* JianliCore in Frameworks */ = {isa = PBXBuildFile; productRef = F77EE9452E8F6674930CC75E /* JianliCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		D0DB84C09C612FA6FF238F9C /* JianliMahjongApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JianliMahjongApp.swift"; sourceTree = "<group>"; };
+		B81638B3F393962081A1B5A1 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model/AppModel.swift"; sourceTree = "<group>"; };
+		F740845B049892A8A98A8F29 /* LanClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Net/LanClient.swift"; sourceTree = "<group>"; };
+		9B7D56E309D0D18A942D51F5 /* LanHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Net/LanHost.swift"; sourceTree = "<group>"; };
+		534923C378FE14C96B16F898 /* Wire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Net/Wire.swift"; sourceTree = "<group>"; };
+		D065FDB56A1018194F6CD49C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UI/HomeView.swift"; sourceTree = "<group>"; };
+		D100E0CAADEB938ABA09ABBA /* RoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UI/RoomView.swift"; sourceTree = "<group>"; };
+		91D069C180F5FF8551DCCFFA /* SettlementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UI/SettlementView.swift"; sourceTree = "<group>"; };
+		D056D0F91645923D9DB7D52C /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UI/TableView.swift"; sourceTree = "<group>"; };
+		7FE040F4F7A3752C1E9CC220 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UI/Theme.swift"; sourceTree = "<group>"; };
+		770C5B730A8FBE3C009C5372 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F5BF48AA40CAD7891EB709FC /* JianliMahjong.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JianliMahjong.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		424153ED3CD079DB4DB459AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39CA2D6E8E1399CA430452B7 /* JianliCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		518DA81DB9B99529C0C0AEBE = {
+			isa = PBXGroup;
+			children = (
+				D1D0524B025E57AFFF263442 /* App */,
+				2F3A6B1E78F896718625FF06 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2F3A6B1E78F896718625FF06 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F5BF48AA40CAD7891EB709FC /* JianliMahjong.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D1D0524B025E57AFFF263442 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D0DB84C09C612FA6FF238F9C /* JianliMahjongApp.swift */,
+				B81638B3F393962081A1B5A1 /* AppModel.swift */,
+				F740845B049892A8A98A8F29 /* LanClient.swift */,
+				9B7D56E309D0D18A942D51F5 /* LanHost.swift */,
+				534923C378FE14C96B16F898 /* Wire.swift */,
+				D065FDB56A1018194F6CD49C /* HomeView.swift */,
+				D100E0CAADEB938ABA09ABBA /* RoomView.swift */,
+				91D069C180F5FF8551DCCFFA /* SettlementView.swift */,
+				D056D0F91645923D9DB7D52C /* TableView.swift */,
+				7FE040F4F7A3752C1E9CC220 /* Theme.swift */,
+				770C5B730A8FBE3C009C5372 /* Info.plist */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		42AEFBAE01D2DFD981F7DA7D /* JianliMahjong */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F2F62AAE534BA46EC59716F3 /* Build configuration list for PBXNativeTarget "JianliMahjong" */;
+			buildPhases = (
+				7A70D71C385290AF96BF1031 /* Sources */,
+				424153ED3CD079DB4DB459AF /* Frameworks */,
+				285BB1C1430063331E9F5DD0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JianliMahjong;
+			packageProductDependencies = (
+				F77EE9452E8F6674930CC75E /* JianliCore */,
+			);
+			productName = JianliMahjong;
+			productReference = F5BF48AA40CAD7891EB709FC /* JianliMahjong.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					42AEFBAE01D2DFD981F7DA7D = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 7EF2517A8FE63F4681EC5EEA /* Build configuration list for PBXProject "JianliMahjong" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = zh_CN;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				zh_CN,
+				Base,
+			);
+			mainGroup = 518DA81DB9B99529C0C0AEBE;
+			packageReferences = (
+				A46A1BCE0B67C45BEC8F435B /* XCLocalSwiftPackageReference "Packages/JianliCore" */,
+			);
+			productRefGroup = 2F3A6B1E78F896718625FF06 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				42AEFBAE01D2DFD981F7DA7D /* JianliMahjong */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		285BB1C1430063331E9F5DD0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7A70D71C385290AF96BF1031 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+\t\t\t\tE4FFB9C7FD1ECA6D8A277EF9 /* JianliMahjongApp.swift in Sources */,
+\t\t\t\t43D652F88621EEE3500FACA6 /* AppModel.swift in Sources */,
+\t\t\t\tA813DA537DEA15910CD577CB /* LanClient.swift in Sources */,
+\t\t\t\t0BAEE61001160F889776B158 /* LanHost.swift in Sources */,
+\t\t\t\t854D6C2B37E247DA0DA2ABF3 /* Wire.swift in Sources */,
+\t\t\t\tECD1269803F379E5A8E93341 /* HomeView.swift in Sources */,
+\t\t\t\tB0E5308C47D4F25EAA28088E /* RoomView.swift in Sources */,
+\t\t\t\tF7342AECEBD9B0D97FBAF234 /* SettlementView.swift in Sources */,
+\t\t\t\tB90D8AF802A19AD1DF66DF3B /* TableView.swift in Sources */,
+\t\t\t\t82B3A16A629F6329B595DDFA /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C19BB360D63F1BA9F02BAB59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+			};
+			name = Debug;
+		};
+		88A29AB70C762FCDF6D9A1D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		331C5106741EE8E14B752D88 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.liangtao.jianlimajiang;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		256639833029BCA847F093AE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.liangtao.jianlimajiang;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7EF2517A8FE63F4681EC5EEA /* Build configuration list for PBXProject "JianliMahjong" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C19BB360D63F1BA9F02BAB59 /* Debug */,
+				88A29AB70C762FCDF6D9A1D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F2F62AAE534BA46EC59716F3 /* Build configuration list for PBXNativeTarget "JianliMahjong" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				331C5106741EE8E14B752D88 /* Debug */,
+				256639833029BCA847F093AE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		A46A1BCE0B67C45BEC8F435B /* XCLocalSwiftPackageReference "Packages/JianliCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/JianliCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F77EE9452E8F6674930CC75E /* JianliCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A46A1BCE0B67C45BEC8F435B /* XCLocalSwiftPackageReference "Packages/JianliCore" */;
+			productName = JianliCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

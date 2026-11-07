@@ -157,6 +157,13 @@ public struct Wall: Codable, Sendable {
         self.tail = tiles.count - 1
     }
 
+    /// 直接给定牌序（回放、单测构造牌局用）
+    public init(tiles: [Tile], head: Int, tail: Int) {
+        self.tiles = tiles
+        self.head = head
+        self.tail = tail
+    }
+
     public var remaining: Int { max(0, tail - head + 1) }
     public var isEmpty: Bool { remaining <= 0 }
 

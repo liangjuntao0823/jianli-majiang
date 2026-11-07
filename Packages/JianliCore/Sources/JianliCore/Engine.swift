@@ -65,6 +65,15 @@ public struct MahjongEngine: Sendable {
         return out
     }
 
+    /// 下一局：谁胡谁坐庄，流局庄家不变；分数跨局累计，不清零。
+    @discardableResult
+    public mutating func startNextHand(seed: UInt64) -> [GameEvent] {
+        if let winner = state.winner { state.dealer = winner }
+        state.seed = seed
+        state.roundIndex += 1
+        return startHand()
+    }
+
     // MARK: - 动作入口
 
     public mutating func apply(_ action: Action, by seat: Seat) throws -> [GameEvent] {
