@@ -225,7 +225,7 @@ def build():
 \t\t\tisa = PBXSourcesBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
-{chr(10).join(f"\\t\\t\\t\\t{builds[f]} /* {os.path.basename(f)} in Sources */," for f in files)}
+{chr(10).join(f"\t\t\t\t{builds[f]} /* {os.path.basename(f)} in Sources */," for f in files)}
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};

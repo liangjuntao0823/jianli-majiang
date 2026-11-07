@@ -158,17 +158,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-\t\t\t\tE4FFB9C7FD1ECA6D8A277EF9 /* JianliMahjongApp.swift in Sources */,
-\t\t\t\t43D652F88621EEE3500FACA6 /* AppModel.swift in Sources */,
-\t\t\t\tA813DA537DEA15910CD577CB /* LanClient.swift in Sources */,
-\t\t\t\t0BAEE61001160F889776B158 /* LanHost.swift in Sources */,
-\t\t\t\t854D6C2B37E247DA0DA2ABF3 /* Wire.swift in Sources */,
-\t\t\t\tECD1269803F379E5A8E93341 /* HomeView.swift in Sources */,
-\t\t\t\tB0E5308C47D4F25EAA28088E /* RoomView.swift in Sources */,
-\t\t\t\tF7342AECEBD9B0D97FBAF234 /* SettlementView.swift in Sources */,
-\t\t\t\t27A7D64362DC43519A22C467 /* Sound.swift in Sources */,
-\t\t\t\tB90D8AF802A19AD1DF66DF3B /* TableView.swift in Sources */,
-\t\t\t\t82B3A16A629F6329B595DDFA /* Theme.swift in Sources */,
+				E4FFB9C7FD1ECA6D8A277EF9 /* JianliMahjongApp.swift in Sources */,
+				43D652F88621EEE3500FACA6 /* AppModel.swift in Sources */,
+				A813DA537DEA15910CD577CB /* LanClient.swift in Sources */,
+				0BAEE61001160F889776B158 /* LanHost.swift in Sources */,
+				854D6C2B37E247DA0DA2ABF3 /* Wire.swift in Sources */,
+				ECD1269803F379E5A8E93341 /* HomeView.swift in Sources */,
+				B0E5308C47D4F25EAA28088E /* RoomView.swift in Sources */,
+				F7342AECEBD9B0D97FBAF234 /* SettlementView.swift in Sources */,
+				27A7D64362DC43519A22C467 /* Sound.swift in Sources */,
+				B90D8AF802A19AD1DF66DF3B /* TableView.swift in Sources */,
+				82B3A16A629F6329B595DDFA /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
