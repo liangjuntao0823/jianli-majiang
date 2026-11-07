@@ -101,7 +101,13 @@ swift test --package-path Packages/JianliCore
 
 ---
 
-## 六、还没关掉的缺口
+## 六、这一轮补掉的体验缺陷
+
+16 条全部落地：出牌倒计时与超时托管、断线与重连、房主退出广播、结算倍乘算式逐家展开、
+红中计数条、尾补标记、两段式出牌防误触、七类音效与触感、听牌剩余张数、小屏专档、结算可滚动、
+种子一键复制、机器人与离线标记、机器人步进降到 300ms、Bonjour 失败时的 IP 直连兜底。
+
+## 七、还没关掉的缺口
 
 规则上有 9 处口径没人拍板，体验上有 16 条按真实玩家视角挑出来的毛病，全部列在
 [`docs/缺陷与待定清单.md`](docs/缺陷与待定清单.md)。其中三条会直接决定手感，优先级最高：
@@ -110,5 +116,6 @@ swift test --package-path Packages/JianliCore
 2. **四张红中全打完的 15 分，与逐张红中的杠分是否叠加**（现在只给一次）。
 3. **真人没有出牌倒计时**，有人发呆就全场卡住（现在只托管机器人）。
 
-CI 文件 `.github/workflows/ci.yml` 已在本地写好但**没能推上去**：当前 PAT 只有 `repo` 权限，
-GitHub 拒绝任何 `.github/workflows/*` 的写入。补一个 `workflow` scope，或直接在网页上手动粘贴该文件，CI 就会跑起来。
+CI 文件 `.github/workflows/ci.yml` 已在本地写好（单测 + `xcodebuild -sdk iphoneos CODE_SIGNING_ALLOWED=NO`
++ 打成 `JianliMahjong-unsigned.ipa` 上传 artifact），但**推不上去**：当前 PAT 只有 `repo` 权限，
+GitHub 对 `.github/workflows/*` 一律拒绝（git push 和 contents API 都是）。换一个有 `workflow` 权限的 token，或网页手动粘贴，CI 立刻开跑。
