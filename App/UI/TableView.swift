@@ -67,6 +67,9 @@ struct TableView: View {
             sideRiverBlock(snap.players[seat(.east).rawValue], m: m)
                 .position(x: w / 2 + m.hubSide / 2 + 10 + sideRiverW / 2, y: h / 2)
 
+            // 牌墙围合（视觉上把桌面收起来）
+            wallRing(snap, m: m, size: size)
+
             // 中央：牌墙余量 / 局数 / 庄家
             hub(snap, m: m)
                 .position(x: w / 2, y: h / 2)
@@ -131,6 +134,59 @@ struct TableView: View {
         .frame(width: side, height: side)
     }
 
+    // MARK: - 牌墙围合
+
+    private func wallRing(_ snap: TableSnapshot, m: Metrics, size: CGSize) -> some View {
+        let side = m.hubSide
+        let thick = max(7, floor(side * 0.13))
+        let w = size.width
+        let h = size.height
+        let gap = thick / 2 + 4
+        let hLength = min(w * 0.26, side * 2.6)
+        let vLength = min(h * 0.52, side * 2.4)
+        return ZStack {
+            WallBlock(size: CGSize(width: hLength, height: thick), vertical: false)
+                .position(x: w / 2, y: h / 2 - side / 2 - gap)
+            WallBlock(size: CGSize(width: hLength, height: thick), vertical: false)
+                .position(x: w / 2, y: h / 2 + side / 2 + gap)
+            WallBlock(size: CGSize(width: thick, height: vLength), vertical: true)
+                .position(x: w / 2 - side / 2 - gap, y: h / 2)
+            WallBlock(size: CGSize(width: thick, height: vLength), vertical: true)
+                .position(x: w / 2 + side / 2 + gap, y: h / 2)
+        }
+        .opacity(snap.wallRemaining > 0 ? 0.92 : 0.35)
+    }
+
+    private struct WallBlock: View {
+        let size: CGSize
+        let vertical: Bool
+        var body: some View {
+            Canvas { context, canvas in
+                let step = max(4, (vertical ? canvas.height : canvas.width) / 12)
+                context.fill(Path(CGRect(origin: .zero, size: canvas)),
+                             with: .color(Color(red: 0.098, green: 0.360, blue: 0.270)))
+                let count = Int((vertical ? canvas.height : canvas.width) / step)
+                for index in 0...max(count, 1) {
+                    var path = Path()
+                    if vertical {
+                        path.move(to: CGPoint(x: 0, y: CGFloat(index) * step))
+                        path.addLine(to: CGPoint(x: canvas.width, y: CGFloat(index) * step))
+                    } else {
+                        path.move(to: CGPoint(x: CGFloat(index) * step, y: 0))
+                        path.addLine(to: CGPoint(x: CGFloat(index) * step, y: canvas.height))
+                    }
+                    context.stroke(path, with: .color(.black.opacity(0.32)), lineWidth: 1)
+                }
+            }
+            .frame(width: size.width, height: size.height)
+            .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.10), lineWidth: 0.8)
+            )
+        }
+    }
+
     // MARK: - 两侧牌背
 
     private struct SideBacks: View {
@@ -181,6 +237,12 @@ struct TableView: View {
         .frame(width: CGFloat(columns) * (m.riverTile.width + 2),
                height: riverBlockHeight(m, rows: max(rows, 1)),
                alignment: .bottom)
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(Color.black.opacity(0.16))
+                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.05), lineWidth: 0.8))
+        )
     }
 
     /// 左右两家：牌横躺，一列 6 张、最多两列
@@ -207,6 +269,12 @@ struct TableView: View {
         .frame(width: CGFloat(2) * (turnW + 2),
                height: CGFloat(perColumn) * (turnH + 2),
                alignment: .bottom)
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(Color.black.opacity(0.16))
+                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.05), lineWidth: 0.8))
+        )
     }
 
     // MARK: - 自己
@@ -215,6 +283,13 @@ struct TableView: View {
         let handH = m.handTile.height
         let bottom = size.height - m.outer
         return ZStack {
+            // 手牌托：底部压暗，把手牌和桌面分开
+            LinearGradient(colors: [.clear, Color.black.opacity(0.40)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(width: size.width, height: handH + 34)
+                .position(x: size.width / 2, y: bottom - (handH + 34) / 2 + 12)
+                .allowsHitTesting(false)
+
             handRow(snap, m: m)
                 .position(x: size.width / 2, y: bottom - handH / 2)
 
@@ -401,9 +476,10 @@ struct TableView: View {
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 3)
-        .frame(width: size.width * 0.40)
-        .background(Capsule().fill(Color.black.opacity(0.26)))
-        .position(x: size.width / 2, y: m.outer + 12 + m.backTile.height / 2)
+        .fixedSize()
+        .background(Capsule().fill(Color.black.opacity(0.22)))
+        .overlay(Capsule().strokeBorder(Color.white.opacity(0.07), lineWidth: 0.8))
+        .position(x: size.width / 2 + 18, y: size.height - m.outer - m.handTile.height - 24)
     }
 
     private func remaining(_ tile: Tile, _ snap: TableSnapshot) -> Int {
@@ -448,7 +524,7 @@ struct TableView: View {
                 .buttonStyle(.plain)
             }
         }
-        .position(x: size.width - 42, y: size.height - 128)
+        .position(x: size.width - 42, y: size.height / 2 - 10)
     }
 
     private func actions(_ snap: TableSnapshot) -> [ActionItem] {
