@@ -80,7 +80,7 @@ struct Metrics {
     var handSpacing: CGFloat { -handTile.width * 0.10 }
 
     var riverTile: CGSize {
-        let h = floor(handTileHeight * (isCompact ? 0.44 : 0.46))
+        let h = floor(handTileHeight * (isCompact ? 0.38 : 0.40))
         return CGSize(width: floor(h * 0.72), height: h)
     }
 
@@ -99,7 +99,7 @@ struct Metrics {
     var riverColumns: Int { isCompact ? 9 : 10 }
     var sideRiverRows: Int { isCompact ? 5 : 6 }
 
-    var hubSide: CGFloat { floor(min(size.height * (isCompact ? 0.155 : 0.175), 76)) }
+    var hubSide: CGFloat { floor(min(size.height * (isCompact ? 0.150 : 0.160), 68)) }
 
     var outer: CGFloat { isCompact ? 8 : 12 }
 }
