@@ -180,6 +180,12 @@ struct TableView: View {
 
     private func meldStrip(_ snap: TableSnapshot, _ m: Metrics) -> some View {
         HStack(spacing: 4) {
+            // 红中是皮子，打出来就摆在自己台面（不进牌河）
+            ForEach(0..<snap.me.redsPlayed, id: \.self) { _ in
+                MahjongTileView(tile: Tile(.red, 0),
+                                size: CGSize(width: m.riverTile.width * 0.92,
+                                             height: m.riverTile.height * 0.92))
+            }
             ForEach(snap.me.melds, id: \.self) { meld in
                 meldView(meld, size: CGSize(width: m.riverTile.width * 0.92,
                                             height: m.riverTile.height * 0.92),

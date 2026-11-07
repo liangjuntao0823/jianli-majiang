@@ -57,9 +57,25 @@ public struct MahjongEngine: Sendable {
                 }
             }
         }
-        for i in 0..<4 { state.players[i].hand.sort() }
+        var out: [GameEvent] = []
 
-        var out: [GameEvent] = [.handStarted(dealer: state.dealer, seed: state.seed, roundIndex: state.roundIndex)]
+        // 起手摸到的红中同样必打：直接摆上自己台面，从尾牌换进来
+        for i in 0..<4 {
+            let seat = Seat(rawValue: i)!
+            var guardCount = 0
+            while let idx = state.players[i].hand.firstIndex(where: { $0.isRed }), guardCount < 8 {
+                guardCount += 1
+                state.players[i].hand.remove(at: idx)
+                state.players[i].redsPlayed += 1
+                out.append(.redDiscarded(seat: seat, count: state.players[i].redsPlayed))
+                if let replacement = state.wall.drawBack() {
+                    state.players[i].hand.append(replacement)
+                }
+            }
+            state.players[i].hand.sort()
+        }
+
+        out.insert(.handStarted(dealer: state.dealer, seed: state.seed, roundIndex: state.roundIndex), at: 0)
         out.append(contentsOf: drawTurn(state.dealer))
         events = out
         return out
@@ -108,12 +124,13 @@ public struct MahjongEngine: Sendable {
             throw EngineError.illegalAction("手里没有这张牌")
         }
         state.players[p].hand.remove(at: idx)
-        state.players[p].river.append(tile)
         state.lastDrawn = nil
+        // 红中是皮子，摆在台面不进牌河，别人也碰不到
+        if !tile.isRed { state.players[p].river.append(tile) }
 
         var out: [GameEvent] = [.discarded(seat: seat, tile: tile), .wallRemaining(state.wall.remaining)]
 
-        // 皮子：打出红中即一次杠，从牌墙后补摸，结算翻倍
+        // 皮子：红中必打，摆在自己台面，从尾牌换一张，结算翻倍
         if tile.isRed {
             state.players[p].redsPlayed += 1
             out.append(.redDiscarded(seat: seat, count: state.players[p].redsPlayed))
@@ -303,16 +320,40 @@ public struct MahjongEngine: Sendable {
 
     @discardableResult
     private mutating func drawTurn(_ seat: Seat, fromBack: Bool = false) -> [GameEvent] {
-        let tile = fromBack ? state.wall.drawBack() : state.wall.drawFront()
-        guard let drawn = tile else { return [finishDrawn()] }
         let p = seat.rawValue
-        state.players[p].hand.append(drawn)
-        state.players[p].hand.sort()
-        state.lastDrawn = drawn
-        state.current = seat
-        state.phase = .awaitingDiscard
-        state.pending = nil
-        return [.turn(seat: seat, drawn: drawn), .wallRemaining(state.wall.remaining)]
+        var out: [GameEvent] = []
+        var back = fromBack
+
+        // 红中必打：摸到红中不能留在手上，直接摆上自己台面，再从尾牌换一张。
+        // 一直换到摸到真牌为止（最多四张，不会死循环）。
+        while true {
+            guard let drawn = back ? state.wall.drawBack() : state.wall.drawFront() else {
+                out.append(finishDrawn())
+                return out
+            }
+            state.lastDrawn = drawn
+            state.lastDrawnFromTail = back
+
+            if drawn.isRed {
+                state.players[p].redsPlayed += 1
+                out.append(.redDiscarded(seat: seat, count: state.players[p].redsPlayed))
+                if state.players[p].redsPlayed >= 4 {
+                    out.append(contentsOf: pay(base: rule.redGangBase, winner: seat, payers: seat.others, reason: .redGang))
+                }
+                out.append(.wallRemaining(state.wall.remaining))
+                back = true
+                continue
+            }
+
+            state.players[p].hand.append(drawn)
+            state.players[p].hand.sort()
+            state.current = seat
+            state.phase = .awaitingDiscard
+            state.pending = nil
+            out.append(.turn(seat: seat, drawn: drawn))
+            out.append(.wallRemaining(state.wall.remaining))
+            return out
+        }
     }
 
     private mutating func finishDrawn() -> GameEvent {

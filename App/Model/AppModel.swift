@@ -553,6 +553,9 @@ final class AppModel: ObservableObject {
             Sound.play(.win)
             return
         }
+        let redsBefore = before.players.reduce(0) { $0 + $1.redsPlayed }
+        let redsAfter = after.players.reduce(0) { $0 + $1.redsPlayed }
+        if redsAfter > redsBefore { Sound.play(.redDiscard) }
         let meldsBefore = before.players.reduce(0) { $0 + $1.melds.count }
         let meldsAfter = after.players.reduce(0) { $0 + $1.melds.count }
         if meldsAfter > meldsBefore {

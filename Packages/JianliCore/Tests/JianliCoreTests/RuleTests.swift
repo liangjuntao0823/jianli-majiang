@@ -203,7 +203,8 @@ final class RuleTests: XCTestCase {
     private func conserve(_ state: GameState) -> Int {
         var total = state.wall.remaining
         for p in state.players {
-            total += p.hand.count + p.river.count
+            // 红中打出来摆在台面，不进牌河，也要算进总数
+            total += p.hand.count + p.river.count + p.redsPlayed
             total += p.melds.reduce(0) { $0 + $1.tileCount }
         }
         return total
