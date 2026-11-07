@@ -49,14 +49,16 @@ final class LanHost {
         }
     }
 
+    /// 先把句柄摘下来再异步关，避免紧接 start() 时把新 listener 一起关掉
     func stop() {
-        queue.async { [weak self] in
-            guard let self else { return }
-            self.listener?.cancel()
-            self.listener = nil
-            for (_, connection) in self.connections { connection.cancel() }
-            self.connections.removeAll()
-            self.buffers.removeAll()
+        let listener = self.listener
+        let sockets = connections
+        self.listener = nil
+        self.connections.removeAll()
+        self.buffers.removeAll()
+        queue.async {
+            listener?.cancel()
+            for (_, connection) in sockets { connection.cancel() }
         }
     }
 
