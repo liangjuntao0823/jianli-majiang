@@ -133,7 +133,7 @@ struct MahjongTileView: View {
                                      startPoint: .top, endPoint: .bottom))
                 .overlay(
                     Group {
-                        if let img = UIImage(named: TileArt.assetName(tile)) {
+                        if let path = Bundle.main.path(forResource: TileArt.assetName(tile), ofType: "png"), let img = UIImage(contentsOfFile: path) {
                             Image(uiImage: img)
                                 .resizable()
                                 .interpolation(.high)
