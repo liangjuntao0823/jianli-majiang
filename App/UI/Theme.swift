@@ -132,12 +132,36 @@ struct MahjongTileView: View {
                 .fill(LinearGradient(colors: [Theme.ivoryTop, Theme.ivoryBottom],
                                      startPoint: .top, endPoint: .bottom))
                 .overlay(
-                    Image(TileArt.assetName(tile))
-                        .resizable()
-                        .interpolation(.high)
-                        .scaledToFit()
-                        .padding(.horizontal, size.width * 0.085)
-                        .padding(.vertical, size.height * 0.075)
+                    Group {
+                        if let img = UIImage(named: TileArt.assetName(tile)) {
+                            Image(uiImage: img)
+                                .resizable()
+                                .interpolation(.high)
+                                .scaledToFit()
+                        } else {
+                            // 兜底：图加载失败时直接画文字，不会出现空白牌
+                            if tile.isRed {
+                                Text("中")
+                                    .font(.system(size: size.height * 0.42, weight: .heavy, design: .serif))
+                                    .foregroundStyle(Color(red: 0.69, green: 0.16, blue: 0.13))
+                            } else {
+                                VStack(spacing: 0) {
+                                    Text(tile.numeral)
+                                        .font(.system(size: size.height * 0.32, weight: .heavy, design: .serif))
+                                        .foregroundStyle(tile.suit == .tiao ? Color(red: 0.10, green: 0.41, blue: 0.24)
+                                                         : (tile.suit == .tong ? Color(red: 0.11, green: 0.29, blue: 0.45)
+                                                            : Color(red: 0.13, green: 0.21, blue: 0.17)))
+                                    Text(tile.suit.symbol)
+                                        .font(.system(size: size.height * 0.20, weight: .bold, design: .serif))
+                                        .foregroundStyle(tile.suit == .tiao ? Color(red: 0.10, green: 0.41, blue: 0.24)
+                                                         : (tile.suit == .tong ? Color(red: 0.11, green: 0.29, blue: 0.45)
+                                                            : Color(red: 0.13, green: 0.21, blue: 0.17)))
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, size.width * 0.085)
+                    .padding(.vertical, size.height * 0.075)
                 )
                 .overlay(
                     shape.strokeBorder(
