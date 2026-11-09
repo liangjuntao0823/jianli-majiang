@@ -67,9 +67,6 @@ struct TableView: View {
             sideRiverBlock(snap.players[seat(.east).rawValue], m: m)
                 .position(x: w / 2 + m.hubSide / 2 + 10 + sideRiverW / 2, y: h / 2)
 
-            // 牌墙围合（视觉上把桌面收起来）
-            wallRing(snap, m: m, size: size)
-
             // 中央：牌墙余量 / 局数 / 庄家
             hub(snap, m: m)
                 .position(x: w / 2, y: h / 2)
@@ -132,59 +129,6 @@ struct TableView: View {
                 .offset(y: side * 0.36)
         }
         .frame(width: side, height: side)
-    }
-
-    // MARK: - 牌墙围合
-
-    private func wallRing(_ snap: TableSnapshot, m: Metrics, size: CGSize) -> some View {
-        let side = m.hubSide
-        let thick = max(7, floor(side * 0.13))
-        let w = size.width
-        let h = size.height
-        let gap = thick / 2 + 4
-        let hLength = min(w * 0.26, side * 2.6)
-        let vLength = min(h * 0.52, side * 2.4)
-        return ZStack {
-            WallBlock(size: CGSize(width: hLength, height: thick), vertical: false)
-                .position(x: w / 2, y: h / 2 - side / 2 - gap)
-            WallBlock(size: CGSize(width: hLength, height: thick), vertical: false)
-                .position(x: w / 2, y: h / 2 + side / 2 + gap)
-            WallBlock(size: CGSize(width: thick, height: vLength), vertical: true)
-                .position(x: w / 2 - side / 2 - gap, y: h / 2)
-            WallBlock(size: CGSize(width: thick, height: vLength), vertical: true)
-                .position(x: w / 2 + side / 2 + gap, y: h / 2)
-        }
-        .opacity(snap.wallRemaining > 0 ? 0.92 : 0.35)
-    }
-
-    private struct WallBlock: View {
-        let size: CGSize
-        let vertical: Bool
-        var body: some View {
-            Canvas { context, canvas in
-                let step = max(4, (vertical ? canvas.height : canvas.width) / 12)
-                context.fill(Path(CGRect(origin: .zero, size: canvas)),
-                             with: .color(Color(red: 0.098, green: 0.360, blue: 0.270)))
-                let count = Int((vertical ? canvas.height : canvas.width) / step)
-                for index in 0...max(count, 1) {
-                    var path = Path()
-                    if vertical {
-                        path.move(to: CGPoint(x: 0, y: CGFloat(index) * step))
-                        path.addLine(to: CGPoint(x: canvas.width, y: CGFloat(index) * step))
-                    } else {
-                        path.move(to: CGPoint(x: CGFloat(index) * step, y: 0))
-                        path.addLine(to: CGPoint(x: CGFloat(index) * step, y: canvas.height))
-                    }
-                    context.stroke(path, with: .color(.black.opacity(0.32)), lineWidth: 1)
-                }
-            }
-            .frame(width: size.width, height: size.height)
-            .clipShape(RoundedRectangle(cornerRadius: 3, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .strokeBorder(Color.white.opacity(0.10), lineWidth: 0.8)
-            )
-        }
     }
 
     // MARK: - 两侧牌背

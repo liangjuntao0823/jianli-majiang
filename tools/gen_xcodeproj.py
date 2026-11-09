@@ -117,7 +117,7 @@ def build():
 \t\t\t\t\t"$(inherited)",
 \t\t\t\t\t"@executable_path/Frameworks",
 \t\t\t\t);
-\t\t\t\tMARKETING_VERSION = 0.1.0;
+\t\t\t\tMARKETING_VERSION = 0.1.0;\n\t\t\t\tCOMPRESS_PNG_FILES = NO;
 \t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = %s;
 \t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";
 \t\t\t\tSUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
