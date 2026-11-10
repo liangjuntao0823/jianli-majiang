@@ -120,55 +120,30 @@ struct MahjongTileView: View {
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: corner, style: .continuous)
         ZStack(alignment: .top) {
-            // 牌身（下半截露出的厚度，做出实体感）
+            // 牌身厚度（底部阴影层）
             shape
-                .fill(LinearGradient(colors: [Color(red: 0.760, green: 0.735, blue: 0.660),
-                                              Color(red: 0.640, green: 0.615, blue: 0.545)],
-                                     startPoint: .top, endPoint: .bottom))
+                .fill(Color(red: 0.60, green: 0.57, blue: 0.50))
                 .offset(y: edge)
 
-            // 牌面
-            shape
-                .fill(LinearGradient(colors: [Theme.ivoryTop, Theme.ivoryBottom],
-                                     startPoint: .top, endPoint: .bottom))
-                .overlay(
-                    Group {
-                        if let path = Bundle.main.path(forResource: TileArt.assetName(tile), ofType: "png"), let img = UIImage(contentsOfFile: path) {
-                            Image(uiImage: img)
-                                .resizable()
-                                .interpolation(.high)
-                                .scaledToFit()
-                        } else {
-                            // 兜底：图加载失败时直接画文字，不会出现空白牌
-                            if tile.isRed {
-                                Text("中")
-                                    .font(.system(size: size.height * 0.42, weight: .heavy, design: .serif))
-                                    .foregroundStyle(Color(red: 0.69, green: 0.16, blue: 0.13))
-                            } else {
-                                VStack(spacing: 0) {
-                                    Text(tile.numeral)
-                                        .font(.system(size: size.height * 0.32, weight: .heavy, design: .serif))
-                                        .foregroundStyle(tile.suit == .tiao ? Color(red: 0.10, green: 0.41, blue: 0.24)
-                                                         : (tile.suit == .tong ? Color(red: 0.11, green: 0.29, blue: 0.45)
-                                                            : Color(red: 0.13, green: 0.21, blue: 0.17)))
-                                    Text(tile.suit.symbol)
-                                        .font(.system(size: size.height * 0.20, weight: .bold, design: .serif))
-                                        .foregroundStyle(tile.suit == .tiao ? Color(red: 0.10, green: 0.41, blue: 0.24)
-                                                         : (tile.suit == .tong ? Color(red: 0.11, green: 0.29, blue: 0.45)
-                                                            : Color(red: 0.13, green: 0.21, blue: 0.17)))
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, size.width * 0.085)
-                    .padding(.vertical, size.height * 0.075)
+            // 牌面（PNG 自带白底和边框）
+            Group {
+                if let path = Bundle.main.path(forResource: TileArt.assetName(tile), ofType: "png"), let img = UIImage(contentsOfFile: path) {
+                    Image(uiImage: img)
+                        .resizable()
+                        .interpolation(.high)
+                        .scaledToFit()
+                } else {
+                    shape
+                        .fill(LinearGradient(colors: [Theme.ivoryTop, Theme.ivoryBottom],
+                                             startPoint: .top, endPoint: .bottom))
+                }
+            }
+            .overlay(
+                shape.strokeBorder(
+                    highlighted ? Theme.gold : Color.clear,
+                    lineWidth: highlighted ? max(1.6, size.width * 0.05) : 0
                 )
-                .overlay(
-                    shape.strokeBorder(
-                        highlighted ? Theme.gold : Color.black.opacity(0.13),
-                        lineWidth: highlighted ? max(1.6, size.width * 0.045) : 0.6
-                    )
-                )
+            )
         }
         .frame(width: size.width, height: size.height + edge)
         .rotationEffect(.degrees(rotation))
