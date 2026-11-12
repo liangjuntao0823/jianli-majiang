@@ -125,19 +125,21 @@ struct MahjongTileView: View {
                 .fill(Color(red: 0.60, green: 0.57, blue: 0.50))
                 .offset(y: edge)
 
-            // 牌面（PNG 自带白底和边框）
+            // 牌面（PNG 自带米白底，按真实麻将牌配色渲染）
             Group {
                 if let path = Bundle.main.path(forResource: TileArt.assetName(tile), ofType: "png"), let img = UIImage(contentsOfFile: path) {
                     Image(uiImage: img)
                         .resizable()
                         .interpolation(.high)
-                        .scaledToFit()
+                        .scaledToFill()
                 } else {
                     shape
                         .fill(LinearGradient(colors: [Theme.ivoryTop, Theme.ivoryBottom],
                                              startPoint: .top, endPoint: .bottom))
                 }
             }
+            .frame(width: size.width, height: size.height)
+            .clipShape(shape)
             .overlay(
                 shape.strokeBorder(
                     highlighted ? Theme.gold : Color.clear,
