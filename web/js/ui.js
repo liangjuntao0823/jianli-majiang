@@ -1,5 +1,6 @@
 /* 牌桌渲染 + 输入 */
-import { tileImage, tileSrc, label, RED_RAW, SEAT_LABEL } from './tiles.js';
+import { tileImage, label, RED_RAW, SEAT_LABEL } from './tiles.js';
+import { TILE_ART } from './tileArt.js';
 
 export const G = {
   getState: null,
@@ -28,13 +29,24 @@ function el(tag, cls, text) {
   return d;
 }
 
+/* 牌面是内联矢量图：每个面只解析一次，之后 clone，避免每帧重新 parse SVG */
+const artPool = {};
+function artNode(raw) {
+  const name = tileImage(raw);
+  if (!artPool[name]) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = TILE_ART[name] || '';
+    const svg = tmp.firstElementChild;
+    if (svg) artPool[name] = svg;
+  }
+  return artPool[name] ? artPool[name].cloneNode(true) : null;
+}
+
 function tileEl(raw, { cls = '', onClick = null } = {}) {
   const d = el('div', ('tile ' + cls).trim());
-  const img = el('img');
-  img.src = tileSrc(raw);
-  img.alt = label(raw);
-  img.draggable = false;
-  d.appendChild(img);
+  d.setAttribute('aria-label', label(raw));
+  const art = artNode(raw);
+  if (art) d.appendChild(art);
   if (onClick) {
     d.classList.add('clickable');
     d.onclick = onClick;

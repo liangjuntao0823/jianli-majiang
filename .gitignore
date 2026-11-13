@@ -7,3 +7,5 @@ build/
 *.ipa
 *.dSYM
 assets/
+node_modules/
+*.log

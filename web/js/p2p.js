@@ -36,6 +36,7 @@ const P = {
   inGame: false,
   resultKey: '',
   lastPhase: '',
+  lastStateVersion: -1,
   hostConn: null,
   loop: null,
   uiTimer: null,
@@ -198,7 +199,7 @@ function onGuest(conn) {
 
   try {
     conn.send({ t: 'hello', seat, started: P.started, over: P.over, code: P.code });
-    conn.send({ t: 'state', seat, started: P.started, over: P.over, snap: snapshotFor(seat) });
+    conn.send({ t: 'state', seat, started: P.started, over: P.over, version: P.version, snap: snapshotFor(seat) });
   } catch {}
   if (!P.inGame) { renderSeats(); renderHostActions(); status(`${name} 加入了（${P.conns.length + 1}/4）`); }
 }
@@ -337,7 +338,7 @@ function hostPush(force = false) {
   if (force || P.version !== P.lastSentVersion) {
     P.lastSentVersion = P.version;
     for (const g of P.conns) {
-      try { if (g.conn.open) g.conn.send({ t: 'state', seat: g.seat, started: P.started, over: P.over, snap: snapshotFor(g.seat) }); } catch {}
+      try { if (g.conn.open) g.conn.send({ t: 'state', seat: g.seat, started: P.started, over: P.over, version: P.version, snap: snapshotFor(g.seat) }); } catch {}
     }
     if (P.engine && P.role === 'host') {
       P.snap = wrapSnapshot(snapshotFor(0));
@@ -401,7 +402,9 @@ function guestMsg(msg) {
     if (typeof msg.seat === 'number') P.seat = msg.seat;
     const snap = msg.snap;
     if (!snap) return;
-    const changed = snap.phase !== P.lastPhase || !P.snap || P.snap.version !== snap.version;
+    const ver = typeof msg.version === 'number' ? msg.version : -1;
+    const changed = ver !== P.lastStateVersion || snap.phase !== P.lastPhase;
+    P.lastStateVersion = ver;
     P.snap = wrapSnapshot(snap);
     P.over = !!snap.over;
     P.lastPhase = snap.phase;
@@ -410,8 +413,8 @@ function guestMsg(msg) {
       renderGuestSeats();
       if (msg.started || snap.started) enterGame();
     }
-    if (P.inGame) { renderAll(); maybeShowResult(); }
-    if (!changed) { /* 状态没变，跳过重绘之外的逻辑 */ }
+    /* 只有版本真的变了才重绘，否则每 250ms 白跑一遍 DOM 会卡 */
+    if (P.inGame && changed) { renderAll(); maybeShowResult(); }
   }
 }
 
@@ -506,7 +509,7 @@ function reset() {
     role: null, code: '', seat: 0, peer: null, conns: [], players: [],
     engine: null, started: false, over: false, version: 0, deadline: null,
     lastKey: '', lastBotAt: 0, lastSentVersion: -1, snap: null, inGame: false,
-    resultKey: '', lastPhase: '', hostConn: null, loop: null, uiTimer: null, joinTimer: null,
+    resultKey: '', lastPhase: '', lastStateVersion: -1, hostConn: null, loop: null, uiTimer: null, joinTimer: null,
   });
 }
 
