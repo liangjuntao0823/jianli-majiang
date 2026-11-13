@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>监利红中 · 网页版</title>
+<link rel="stylesheet" href="css/table.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+
+<div id="rotate-tip">请横屏使用</div>
+
+<div id="home">
+  <div class="brand">监利红中<small>局域网四人麻将</small></div>
+  <div class="home-btns">
+    <button class="big-btn" id="btn-single">单机开局（3 个机器人）</button>
+    <button class="big-btn ghost" id="btn-lan">局域网联机</button>
+  </div>
+  <div class="home-rule">
+    112 张 · 红中为皮子必打（摸到直接从牌墙尾换真牌）· 只能自摸 · 可碰杠不可吃<br>
+    自摸 10 / 点杠 10 / 暗杠 15 / 蓄杠 5 · 赢家每打出 1 张红中翻一倍，付款方也按自己打出的红中再翻一倍<br>
+    首局房主坐庄，谁胡谁坐庄，流局庄家不变
+  </div>
+</div>
+
+<div id="table">
+  <div id="topbar">
+    <button class="icon-btn" id="btn-exit" title="退出">✕</button>
+  </div>
+
+  <div class="seat top" id="seat-top"></div>
+  <div class="seat left" id="seat-left"></div>
+  <div class="seat right" id="seat-right"></div>
+  <div class="seat bottom" id="seat-bottom"></div>
+
+  <div class="center" id="center">
+    <div class="core" id="core"></div>
+    <div class="river self" id="river-bottom"></div>
+    <div class="river top" id="river-top"></div>
+    <div class="river left" id="river-left"></div>
+    <div class="river right" id="river-right"></div>
+  </div>
+
+  <div id="hint" class="hidden"></div>
+  <div id="actions"></div>
+  <div id="toast"></div>
+</div>
+
+<div id="lobby">
+  <div class="lobby-card">
+    <div class="lobby-title">局域网房间</div>
+    <div class="lobby-sub">用同一个 WiFi，四个人打开同一个地址</div>
+    <div id="lobby-name-row">
+      <input id="lobby-name" maxlength="8" placeholder="输入你的名字" autocomplete="off">
+      <button class="big-btn" id="lobby-join">加入</button>
+    </div>
+    <div id="lobby-seats"></div>
+    <div id="lobby-status"></div>
+    <div id="lobby-actions"></div>
+  </div>
+</div>
+
+<div id="result">
+  <div class="result-card" id="result-card"></div>
+</div>
+
+<script type="module" src="js/game.js"></script>
+</body>
+</html>
