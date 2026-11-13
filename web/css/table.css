@@ -250,10 +250,11 @@ body::after {
 
 /* 对家/左右 的副露 */
 .seat.top .meld-row { position: absolute; right: 0; top: 6.6vh; display: flex; gap: 6px; max-width: 20vw; flex-wrap: wrap-reverse; justify-content: flex-end; }
-.seat.left .meld-row { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12.5vh; display: flex; flex-direction: column; gap: 5px; }
-.seat.right .meld-row { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12.5vh; display: flex; flex-direction: column; gap: 5px; }
+.seat.left .meld-row { position: absolute; left: 50%; transform: translateX(-50%); bottom: 15.5vh; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.seat.right .meld-row { position: absolute; left: 50%; transform: translateX(-50%); bottom: 15.5vh; display: flex; flex-direction: column; gap: 4px; align-items: center; }
 .seat.left .meld-row .tile.meld,
-.seat.right .meld-row .tile.meld { width: calc(var(--river-w) * 0.86); height: calc(var(--river-w) * 1.2); }
+.seat.right .meld-row .tile.meld { width: calc(var(--river-w) * 0.70); height: calc(var(--river-w) * 0.98); }
+.seat.left .meld-group, .seat.right .meld-group { gap: 1.5px; }
 
 /* ---------- 中央区域 ---------- */
 .center {
@@ -312,7 +313,7 @@ body::after {
 /* 提示 */
 #hint {
   position: absolute;
-  left: 50%; top: 49.5vh;
+  left: 50%; top: 28.8vh;
   transform: translateX(-50%);
   padding: 7px 20px;
   border-radius: 999px;
@@ -457,3 +458,35 @@ body::after {
 #lobby-status { color: #ff9c8a; font-size: 13px; text-align: center; min-height: 16px; }
 #lobby-actions { display: flex; justify-content: center; }
 #lobby-actions .big-btn { min-width: 220px; }
+
+/* ---- 手机联机（P2P）大厅 ---- */
+#p2p-box { display: flex; flex-direction: column; gap: 10px; }
+#p2p-entry { display: flex; flex-direction: column; gap: 10px; }
+#p2p-entry input {
+  width: 100%; box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(233,196,106,0.45);
+  background: rgba(255,255,255,0.06);
+  color: var(--ink);
+  font-size: clamp(14px, 2.2vh, 17px);
+  outline: none;
+  text-align: center;
+}
+#p2p-entry input::placeholder { color: rgba(243,236,216,0.35); }
+#p2p-code { letter-spacing: 0.12em; font-weight: 700; text-transform: uppercase; }
+.p2p-or { text-align: center; color: rgba(243,236,216,0.42); font-size: clamp(11px, 1.7vh, 13px); margin: 4px 0; }
+.p2p-join-row { display: flex; gap: 10px; align-items: center; }
+.p2p-join-row input { flex: 1; min-width: 0; }
+.p2p-join-row .big-btn { min-width: 96px; padding: 12px 18px; font-size: clamp(14px, 2.2vh, 17px); }
+#p2p-code-show { text-align: center; padding: 6px 0 2px; }
+.p2p-code-label { font-size: clamp(11px, 1.7vh, 13px); letter-spacing: 0.24em; color: rgba(243,236,216,0.5); }
+.p2p-code {
+  font-size: clamp(30px, 7vh, 56px);
+  letter-spacing: 0.16em;
+  color: var(--gold);
+  font-weight: 800;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  line-height: 1.15;
+  text-shadow: 0 2px 12px rgba(233,196,106,0.35);
+}

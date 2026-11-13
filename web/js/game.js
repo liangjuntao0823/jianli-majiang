@@ -7,6 +7,7 @@ import {
   showResult, hideResult, backToHome,
 } from './ui.js';
 import { openLAN } from './net.js';
+import { openP2P } from './p2p.js';
 
 const PLAY_SECONDS = 30;
 const CLAIM_SECONDS = 8;
@@ -31,7 +32,22 @@ const el = (id) => document.getElementById(id);
 /* ---------------- 入口 ---------------- */
 
 el('btn-single').addEventListener('click', startSingle);
-el('btn-lan').addEventListener('click', () => openLAN());
+/* 联机入口：有服务器（node server.js / 云托管）走局域网模式；
+ * 纯静态打开（双击 HTML、手机本地打开）没有后端，走手机 P2P 建房。 */
+el('btn-lan').addEventListener('click', () => {
+  if (location.protocol === 'file:') { openP2P(); return; }
+  let settled = false;
+  const go = (serverMode) => {
+    if (settled) return;
+    settled = true;
+    if (serverMode) openLAN(); else openP2P();
+  };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => { ctrl.abort(); go(false); }, 1200);
+  fetch('/api/room', { signal: ctrl.signal, cache: 'no-store' })
+    .then((r) => { clearTimeout(timer); r.json().then(() => go(true)).catch(() => go(false)); })
+    .catch(() => { clearTimeout(timer); go(false); });
+});
 
 function startSingle() {
   const seed = (Date.now() & 0xffffffff) >>> 0;

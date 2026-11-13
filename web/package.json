@@ -6,5 +6,8 @@
   "scripts": {
     "test": "node --test test/",
     "start": "node server.js"
+  },
+  "dependencies": {
+    "peerjs": "^1.5.5"
   }
 }
