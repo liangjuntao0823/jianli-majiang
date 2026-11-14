@@ -796,3 +796,42 @@ body.rotated #table, body.rotated #home, body.rotated #lobby, body.rotated #resu
 
 /* 已听牌：手牌区金色光晕 */
 .hand-zone.ting-glow { filter: drop-shadow(0 0 10px rgba(255, 196, 80, 0.6)); }
+
+/* 被叫的牌：抬得更高、金边更重，并标出是谁打的 */
+.tile.mini.raised {
+  overflow: visible;
+  transform: translateY(-58%) scale(1.24);
+  box-shadow: 0 0 0 3px #ffd76a, 0 0 22px rgba(255, 196, 80, 0.95), 0 6px 14px rgba(0,0,0,0.55);
+  z-index: 12;
+  position: relative;
+}
+.tile.mini.raised img { border-radius: inherit; }
+.tile.mini.raised .disc-tag {
+  position: absolute;
+  top: calc(var(--river-w) * -0.88);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: clamp(9px, calc(1.35 * var(--uv)), 13px);
+  font-weight: 800;
+  color: #12211d;
+  background: linear-gradient(180deg, #ffe9a8, #f0c95c);
+  border-radius: 999px;
+  padding: 1px calc(var(--river-w) * 0.22);
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+}
+
+/* 自己手上能碰/能杠的牌：整体点亮并上浮 */
+.tile.claimable {
+  transform: translateY(-14%);
+  box-shadow: 0 0 0 3px #ffd76a, 0 0 20px rgba(255, 196, 80, 0.9);
+  filter: brightness(1.06);
+  z-index: 5;
+  position: relative;
+  animation: claimPulse 1.1s ease-in-out infinite;
+}
+@keyframes claimPulse {
+  0%, 100% { box-shadow: 0 0 0 3px #ffd76a, 0 0 14px rgba(255,196,80,0.75); }
+  50% { box-shadow: 0 0 0 4px #fff0bd, 0 0 26px rgba(255,214,110,1); }
+}

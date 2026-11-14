@@ -308,14 +308,23 @@ function renderMyHand(box, seat) {
     if (idx >= 0) { hand.splice(idx, 1); drawn = s.lastDrawn; }
   }
 
+  // 别人打出、我能碰/杠的那张牌：把手里的同款牌也点亮
+  let claimRaw = null;
+  if (seat === G.humanSeat && s.phase === 'awaitingClaim' && s.pending) {
+    const opts = G.getPendingOptions ? (G.getPendingOptions() || []) : ((s.pending.options && s.pending.options[G.humanSeat]) || []);
+    if (opts.includes('peng') || opts.includes('gang')) claimRaw = s.pending.tile;
+  }
+
   for (const raw of hand) {
     const t = tileEl(raw, canPlay ? { onClick: () => onTileClick(raw, false) } : {});
     if (canPlay && G.selected && G.selected.raw === raw && !G.selected.drawn) t.classList.add('selected');
+    if (claimRaw !== null && raw === claimRaw) t.classList.add('claimable');
     zone.append(t);
   }
   if (drawn !== null) {
     const t = tileEl(drawn, { cls: 'drawn', onClick: canPlay ? () => onTileClick(drawn, true) : null });
     if (canPlay && G.selected && G.selected.raw === drawn && G.selected.drawn) t.classList.add('selected');
+    if (claimRaw !== null && drawn === claimRaw) t.classList.add('claimable');
     zone.append(t);
   }
   box.append(zone);
@@ -359,7 +368,16 @@ function renderRiver(seat) {
   const prev = G.prevRiver[seat] || 0;
   p.river.forEach((raw, i) => {
     const t = tileEl(raw, { cls: 'mini' });
-    if (seat === pendingSeat && i === p.river.length - 1) t.classList.add('raised');
+    if (seat === pendingSeat && i === p.river.length - 1) {
+      t.classList.add('raised');
+      if (s.pending && s.pending.options && Object.keys(s.pending.options).length) {
+        const canClaim = ['peng', 'gang', 'hu'].some((k) => (s.pending.options[G.humanSeat] || []).includes(k));
+        if (canClaim) {
+          const tag = el('div', 'disc-tag', p.name + (s.pending.tile === RED_RAW ? '' : ' 打'));
+          t.append(tag);
+        }
+      }
+    }
     if (i === p.river.length - 1 && p.river.length > prev) t.classList.add('drop-in');
     box.append(t);
   });
@@ -559,3 +577,6 @@ export function showResult({ title, subtitle, winnerSeat, hand, melds, payments,
 export function hideResult() {
   document.getElementById('result').classList.remove('show');
 }
+
+/* 调试入口：外部可直接触发一次完整重绘 */
+if (typeof window !== "undefined") window.__render = renderAll;
