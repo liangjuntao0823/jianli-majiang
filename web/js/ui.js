@@ -15,6 +15,7 @@ export const G = {
   mode: 'single',
   totalRounds: 8,
   timerFill: null,
+  seatNames: null,
 };
 
 const st = () => G.getState();
@@ -101,6 +102,14 @@ export function bindLayout() {
 }
 bindLayout();
 
+export function resetEventState() {
+  meldSnap = {};
+  lastPhase = null;
+  wasTing = false;
+  const box = document.getElementById('event');
+  if (box) box.innerHTML = '';
+}
+
 export function initTable(opts) {
   Object.assign(G, opts);
   G.selected = null;
@@ -125,10 +134,64 @@ export function backToHome() {
   document.getElementById('result').classList.remove('show');
 }
 
+/* ---------------- 中央大字事件 ---------------- */
+const MELD_SAY = {
+  peng: ['碰', '碰！'],
+  gangExposed: ['杠', '明杠！'],
+  gangConcealed: ['杠', '暗杠！'],
+  gangAdded: ['回头笑', '回头笑！'],
+};
+
+function flashEvent(main, sub) {
+  const box = document.getElementById('event');
+  if (!box) return;
+  box.innerHTML = '';
+  const wrap = el('div', 'ev-box');
+  wrap.append(el('div', 'ev-main', main));
+  if (sub) wrap.append(el('div', 'ev-sub', sub));
+  box.append(wrap);
+  setTimeout(() => { if (box.firstChild === wrap) box.innerHTML = ''; }, 1100);
+}
+
+let meldSnap = {};
+let lastPhase = null;
+let wasTing = false;
+function detectEvents(s) {
+  if (!s) return;
+  // 副露新增 → 大字
+  for (let seat = 0; seat < 4; seat++) {
+    const p = s.players[seat];
+    const n = p.melds.length;
+    const prev = meldSnap[seat] === undefined ? n : meldSnap[seat];
+    if (n > prev) {
+      const m = p.melds[n - 1];
+      const say = MELD_SAY[m.kind];
+      if (say) flashEvent(say[1], seat === G.humanSeat ? '' : (G.seatNames ? G.seatNames[seat] : ''));
+    }
+    meldSnap[seat] = n;
+  }
+  // 本局结束 → 胡 / 流局
+  if (s.phase === 'finished' && lastPhase !== 'finished') {
+    if (s.winner !== null && s.winner !== undefined) {
+      const who = s.winner === G.humanSeat ? '你' : (G.seatNames ? G.seatNames[s.winner] : '');
+      flashEvent('胡！', who ? who + ' 自摸' : '');
+    } else {
+      flashEvent('流局', '');
+    }
+  }
+  lastPhase = s.phase;
+  // 刚听牌 → 中央大字
+  const myWaits = calcWaits(s.players[G.humanSeat]);
+  const isTing = !!(myWaits && myWaits.mode === 'ting');
+  if (isTing && !wasTing) flashEvent('听牌！', myWaits.waits.map(label).join(' '));
+  wasTing = isTing;
+}
+
 /* ---------------- 主渲染 ---------------- */
 
 export function renderAll() {
   const s = st();
+  detectEvents(s);
   G.timerFill = null;
   for (let seat = 0; seat < 4; seat++) {
     renderSeat(seat);
@@ -232,6 +295,8 @@ function renderMyHand(box, seat) {
   const s = st();
   const p = s.players[seat];
   const zone = el('div', 'hand-zone');
+  const myW = calcWaits(p);
+  if (seat === G.humanSeat && myW && myW.mode === 'ting') zone.classList.add('ting-glow');
 
   const canPlay = seat === G.humanSeat && s.phase === 'awaitingDiscard' && s.current === seat && G.onDiscard !== null;
   const showDrawn = s.current === seat && s.phase === 'awaitingDiscard' && s.lastDrawn !== null;
@@ -383,12 +448,12 @@ function calcWaits(p) {
   const hand = p.hand.slice();
   if (hand.some((t) => t === RED_RAW)) return null;
   const meldCount = p.melds.length;
-  const waitLen = 13 - meldCount * 3;
-  if (hand.length === waitLen) {
+  const rem = hand.length % 3;   // 1 = 等牌(3n+1)，2 = 已摸牌(3n+2)
+  if (rem === 1) {
     const waits = waitingTiles(hand, meldCount);
     return waits.length ? { mode: 'ting', waits } : null;
   }
-  if (hand.length === waitLen + 1) {
+  if (rem === 2) {
     let best = null;
     for (const t of [...new Set(hand)]) {
       const rest = hand.slice();

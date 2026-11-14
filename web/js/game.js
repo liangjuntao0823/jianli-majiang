@@ -4,7 +4,7 @@ import { nextAction, discardCandidate } from './bot.js';
 import { label, SEAT_LABEL } from './tiles.js';
 import {
   G as UIView, initTable, renderAll, updateTimer, showToast, clearToast,
-  showResult, hideResult, backToHome,
+  showResult, hideResult, backToHome, resetEventState,
 } from './ui.js';
 import { openLAN } from './net.js';
 import { openP2P } from './p2p.js';
@@ -59,6 +59,8 @@ function startSingle() {
   S.finalShown = false;
   e.startHand();
 
+  UIView.seatNames = S.names;
+  resetEventState();
   initTable(tableOpts(e, 0, 'single', S.names, S.rounds));
   renderAll();
   schedule();
@@ -312,6 +314,8 @@ export function attachEngine(engine, humanSeat, mode, names, rounds) {
   S.rounds = rounds || S.rounds;
   S.running = true;
   S.finalShown = false;
+  UIView.seatNames = S.names;
+  resetEventState();
   initTable(tableOpts(engine, S.humanSeat, S.mode, S.names, S.rounds));
   renderAll();
   schedule();

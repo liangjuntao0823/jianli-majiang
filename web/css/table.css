@@ -1,6 +1,8 @@
 /* 监利红中 · 网页版牌桌样式（横屏） */
 
 :root {
+  --meld-w: calc(var(--river-w) * 1.06);
+  --meld-h: calc(var(--river-w) * 1.48);
   --uv: 1vh;
   --uh: 1vw;
   --felt-1: #0f3a31;
@@ -220,8 +222,8 @@ body::after {
   box-shadow: 0 1px 0 #cfc5aa, 0 2px 4px rgba(0,0,0,0.35);
 }
 .tile.meld {
-  width: calc(var(--river-w) * 1.06);
-  height: calc(var(--river-w) * 1.48);
+  width: var(--meld-w);
+  height: var(--meld-h);
 }
 .tile.red-mark {
   width: calc(var(--river-w) * 0.92);
@@ -268,8 +270,9 @@ body::after {
 .seat.top .meld-row { position: absolute; right: 0; top: calc(6.6 * var(--uv)); display: flex; gap: 6px; max-width: calc(20 * var(--uh)); flex-wrap: wrap-reverse; justify-content: flex-end; }
 .seat.left .meld-row { position: absolute; left: 50%; transform: translateX(-50%); top: calc(1 * var(--uv)); display: flex; flex-direction: column; gap: 2px; align-items: center; max-width: 100%; }
 .seat.right .meld-row { position: absolute; left: 50%; transform: translateX(-50%); top: calc(1 * var(--uv)); display: flex; flex-direction: column; gap: 2px; align-items: center; max-width: 100%; }
-.seat.left .meld-row .tile.meld,
-.seat.right .meld-row .tile.meld { width: calc(var(--river-w) * 0.52); height: calc(var(--river-w) * 0.73); }
+.seat.left .meld-row,
+.seat.right .meld-row { --meld-w: calc(var(--river-w) * 0.56); --meld-h: calc(var(--river-w) * 0.78); }
+.seat.top .meld-row { --meld-w: calc(var(--river-w) * 0.82); --meld-h: calc(var(--river-w) * 1.14); }
 .seat.left .meld-row .meld-group, .seat.right .meld-row .meld-group { gap: 1px; }
 .seat.left .meld-group, .seat.right .meld-group { gap: 1.5px; }
 
@@ -530,9 +533,7 @@ body::after {
   }
   .seat.left .meld-row, .seat.right .meld-row { top: calc(31 * var(--uv)); }
   .seat.top .opp-hand { top: calc(8 * var(--uv)); }
-  .seat.left .meld-row .tile.meld, .seat.right .meld-row .tile.meld {
-    width: calc(var(--river-w) * 0.44); height: calc(var(--river-w) * 0.62);
-  }
+  .seat.left .meld-row, .seat.right .meld-row { --meld-w: calc(var(--river-w) * 0.48); --meld-h: calc(var(--river-w) * 0.67); }
   .core .num { font-size: clamp(26px, calc(8 * var(--uv)), 40px); }
   .core .unit { font-size: 10px; }
 }
@@ -572,24 +573,20 @@ body::after {
 .meld-group.gang { position: relative; }
 .meld-group.gang > .stack {
   position: absolute;
-  right: calc(var(--river-w) * 0.30);
-  top: calc(var(--river-w) * -0.62);
+  right: calc(var(--meld-w) * 0.02);
+  top: calc(var(--meld-h) * -0.30);
   display: flex; z-index: 3;
 }
 .meld-group.gang > .stack .tile.meld { box-shadow: -2px -2px 0 rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.5); }
 .meld-group.gang > .stack .tile.hand-back.meld {
-  width: calc(var(--river-w) * 1.06); height: calc(var(--river-w) * 1.48); border-radius: calc(var(--river-w) * 0.12);
+  width: var(--meld-w); height: var(--meld-h); border-radius: calc(var(--meld-w) * 0.11);
 }
 
 /* 皮子小牌（他家台面） */
 .red-zone.small { gap: 2px; }
 .red-mark.tiny { width: calc(var(--river-w) * 0.44); height: calc(var(--river-w) * 0.62); }
 /* 侧家牌更小，堆叠偏移同比缩小 */
-.seat.left .meld-group.gang > .stack,
-.seat.right .meld-group.gang > .stack {
-  right: calc(var(--river-w) * -0.09);
-  top: calc(var(--river-w) * -0.32);
-}
+
 
 /* ---------- 牌河：被打出的那张举高 ---------- */
 .tile.mini.raised {
@@ -770,3 +767,32 @@ body.rotated body::after { display: none; }
 body.rotated #table, body.rotated #home, body.rotated #lobby, body.rotated #result {
   right: auto; bottom: auto;
 }
+
+/* ---------- 中央大字事件（碰/杠/回头笑/胡） ---------- */
+#event {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 40;
+}
+#event .ev-box { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+#event .ev-main {
+  font-size: clamp(40px, calc(13 * var(--uv)), 140px);
+  font-weight: 900; letter-spacing: 0.08em; line-height: 1;
+  color: #fff3cf;
+  text-shadow: 0 0 calc(14 * var(--uv)) rgba(255,196,80,0.95), 0 4px 0 #6b3f00, 0 0 40px rgba(255,150,0,0.6);
+  animation: evPop 1.05s cubic-bezier(0.18, 1.2, 0.3, 1) forwards;
+}
+#event .ev-sub {
+  font-size: clamp(12px, calc(2.6 * var(--uv)), 26px);
+  color: #ffe9a8; font-weight: 700; letter-spacing: 0.06em;
+  animation: evPop 1.05s cubic-bezier(0.18, 1.2, 0.3, 1) 0.04s forwards; opacity: 0;
+}
+@keyframes evPop {
+  0%   { transform: scale(0.55); opacity: 0; }
+  30%  { transform: scale(1.18); opacity: 1; }
+  46%  { transform: scale(1); }
+  78%  { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.06); opacity: 0; }
+}
+
+/* 已听牌：手牌区金色光晕 */
+.hand-zone.ting-glow { filter: drop-shadow(0 0 10px rgba(255, 196, 80, 0.6)); }

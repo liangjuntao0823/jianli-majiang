@@ -6,7 +6,7 @@
 export const RED_RAW = 27;
 export const ALL_KINDS = Array.from({ length: 28 }, (_, i) => i);
 export const NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
-export const SUIT_SYMBOL = ['萬', '筒', '條'];
+export const SUIT_SYMBOL = ['万', '筒', '条'];
 
 export const isRed = (raw) => raw === RED_RAW;
 export const suitOf = (raw) => (raw === RED_RAW ? 3 : Math.floor(raw / 9));
