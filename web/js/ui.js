@@ -252,6 +252,9 @@ function renderSeat(seat) {
   if (slot) slot.innerHTML = '';
 
   const info = el('div', 'info' + (s.current === seat && s.phase !== 'finished' ? ' active' : ''));
+  const avatar = el('div', 'avatar', (p.name || '?').slice(-1));
+  avatar.classList.add('av' + seat);
+  const bodyEl = el('div', 'body');
   const row1 = el('div', 'row1');
   row1.append(el('span', 'wind', SEAT_LABEL[seat]), el('span', 'name', p.name));
   if (s.current === seat && s.phase !== 'finished') row1.append(el('span', 'tag live', '出牌中'));
@@ -261,13 +264,12 @@ function renderSeat(seat) {
   const row2 = el('div', 'row2');
   const score = el('span', 'score ' + (p.score > 0 ? 'pos' : p.score < 0 ? 'neg' : ''), (p.score > 0 ? '+' : '') + p.score);
   row2.append(score);
-  info.append(row1, row2);
-
   const track = el('div', 'timer-track');
   const fill = el('div', 'timer-fill');
   fill.style.width = '0%';
   track.append(fill);
-  info.append(track);
+  bodyEl.append(row1, row2, track);
+  info.append(avatar, bodyEl);
   if (s.current === seat && s.phase !== 'finished') G.timerFill = fill;
 
   if (slot) slot.append(info);
@@ -366,6 +368,16 @@ function renderMyHand(box, seat) {
     if (claimRaw !== null && drawn === claimRaw) t.classList.add('claimable');
     zone.append(t);
   }
+  // 手牌弧形：中间低、两头略高，像真牌摊在桌上
+  const kids = [...zone.querySelectorAll('.tile')];
+  const n = kids.length;
+  const mid = (n - 1) / 2;
+  kids.forEach((t, i) => {
+    const off = i - mid;
+    t.style.setProperty('--rot', (off * 0.5).toFixed(2) + 'deg');
+    t.style.setProperty('--lift', (off * off * 0.1).toFixed(1) + 'px');
+    t.style.setProperty('--z', String(i));
+  });
   box.append(zone);
 }
 
@@ -429,11 +441,19 @@ function renderCore() {
   const s = st();
   const core = document.getElementById('core');
   core.innerHTML = '';
+  // 四向罗盘，围在中央圆盘外侧
+  const DIRS = [['北', 'cn'], ['东', 'ce'], ['南', 'cs'], ['西', 'cw']];
+  for (const [txt, cls] of DIRS) {
+    const d = el('span', 'compass ' + cls, txt);
+    if (SEAT_LABEL[s.dealer] === txt) d.classList.add('is-dealer');
+    core.append(d);
+  }
   core.append(el('div', 'num', String(s.wall.remaining)));
   core.append(el('div', 'unit', '张'));
   const round = el('div', 'round');
   round.innerHTML = `${SEAT_LABEL[s.dealer]}庄 <b>${s.roundIndex}</b>/${G.totalRounds}`;
   core.append(round);
+  core.append(el('div', 'cd', '30'));
   if (G.hintText) {
     const line = el('div', 'hint-line');
     line.innerHTML = G.hintText;
@@ -561,9 +581,17 @@ function renderWaits() {
 /* ---------------- 计时 / 提示 ---------------- */
 
 export function updateTimer(ratio) {
+  const r = Math.max(0, Math.min(1, ratio));
+  const cd = document.querySelector('#core .cd');
+  if (cd) {
+    cd.textContent = String(Math.ceil(r * 30));
+    cd.classList.toggle('low', r <= 0.34);
+  }
+  const ring = document.querySelector('#core');
+  if (ring && ring.style) ring.style.setProperty('--cd-ratio', r.toFixed(3));
   if (!G.timerFill) return;
-  G.timerFill.style.width = Math.max(0, Math.min(1, ratio)) * 100 + '%';
-  G.timerFill.classList.toggle('run', ratio < 0.35);
+  G.timerFill.style.width = r * 100 + '%';
+  G.timerFill.classList.toggle('run', r < 0.35);
 }
 
 export function showToast(text, cls = '', ms = 2000) {

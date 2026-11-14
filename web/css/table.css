@@ -867,3 +867,346 @@ body.rotated #table, body.rotated #home, body.rotated #lobby, body.rotated #resu
   pointer-events: none;
   will-change: left, top, transform;
 }
+
+/* ============================================================
+   视觉升级：桌面材质 / 立体牌 / 头像信息 / 中央罗盘 / 出牌指示
+   ============================================================ */
+
+/* ---------- 桌面：木框 + 毛毡 + 暗角 ---------- */
+body {
+  background:
+    radial-gradient(120% 90% at 18% 0%, #6d4526 0%, #3a2313 45%, #180d07 100%);
+}
+#table {
+  background:
+    radial-gradient(78% 68% at 50% 46%, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 62%),
+    radial-gradient(120% 100% at 50% 42%, #1e7360 0%, #17604f 38%, #104a3c 72%, #0a3128 100%);
+  box-shadow:
+    inset 0 0 calc(14 * var(--uv)) calc(3 * var(--uv)) rgba(0,0,0,0.55),
+    inset 0 0 0 calc(0.55 * var(--uv)) rgba(0,0,0,0.4);
+  border-radius: calc(1.6 * var(--uv));
+  border: calc(1.9 * var(--uv)) solid #6b3f22;
+  border-image: linear-gradient(150deg,#8c5730,#4a2814 40%,#7a4a26 70%,#3a1e0f) 1;
+}
+/* 木框内沿一道金线 */
+#table::before {
+  content: '';
+  position: absolute; inset: calc(-1.2 * var(--uv));
+  border: 1px solid rgba(233,196,106,0.18);
+  border-radius: calc(1.8 * var(--uv));
+  pointer-events: none;
+}
+/* 台面暗纹，模拟毛毡纤维 */
+#table::after {
+  content: '';
+  position: absolute; inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.028) 0 2px, rgba(0,0,0,0) 2px 5px);
+  mix-blend-mode: soft-light;
+  opacity: 0.9;
+}
+
+/* ---------- 牌：3D 厚度 + 高光 ---------- */
+.tile {
+  border-radius: calc(0.5 * var(--uv));
+  background: linear-gradient(158deg, #fffef9 0%, #faf5e6 58%, #e8e1c9 100%);
+  box-shadow:
+    0 calc(0.26 * var(--uv)) 0 #d6cfb6,
+    0 calc(0.44 * var(--uv)) 0 #b9b096,
+    0 calc(0.66 * var(--uv)) calc(0.5 * var(--uv)) rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 calc(-0.3 * var(--uv)) 0 rgba(0,0,0,0.05);
+}
+.tile::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(120,100,60,0.16);
+}
+.tile img { border-radius: inherit; }
+.tile.hand-back {
+  background: linear-gradient(158deg, #24806a 0%, #166553 55%, #0d4a3d 100%);
+  box-shadow:
+    0 calc(0.26 * var(--uv)) 0 #0d4536,
+    0 calc(0.44 * var(--uv)) 0 #083028,
+    0 calc(0.66 * var(--uv)) calc(0.5 * var(--uv)) rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.tile.hand-back::after { box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10); }
+
+/* 手牌弧形与选中 */
+.hand-zone .tile {
+  transform-origin: 50% 120%;
+  transform: rotate(var(--rot, 0deg)) translateY(var(--lift, 0px));
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+.hand-zone .tile.selected {
+  transform: translateY(-16%) scale(1.06) rotate(var(--rot, 0deg));
+  box-shadow:
+    0 calc(0.4 * var(--uv)) 0 #d6cfb6,
+    0 calc(0.7 * var(--uv)) calc(1.1 * var(--uv)) rgba(233,196,106,0.55),
+    0 0 calc(1.6 * var(--uv)) rgba(233,196,106,0.45);
+}
+.hand-zone .tile.drawn { margin-left: calc(1.1 * var(--uh)); }
+.hand-zone.ting-glow .tile {
+  box-shadow:
+    0 calc(0.26 * var(--uv)) 0 #d6cfb6,
+    0 0 calc(1.5 * var(--uv)) rgba(255,213,120,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+}
+
+/* 牌河：最后打出的一张 —— 抬高 + 黄色指示箭头 */
+.tile.mini.raised::before {
+  content: '';
+  position: absolute;
+  left: calc(-0.9 * var(--uv));
+  top: calc(-0.9 * var(--uv));
+  width: 0; height: 0;
+  border-top: calc(1.3 * var(--uv)) solid #ffd75e;
+  border-right: calc(1.1 * var(--uv)) solid transparent;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
+  transform: rotate(45deg);
+  z-index: 5;
+  animation: arrowBob 0.9s ease-in-out infinite;
+}
+@keyframes arrowBob {
+  0%, 100% { transform: rotate(45deg) translate(0, 0); }
+  50% { transform: rotate(45deg) translate(2px, -2px); }
+}
+
+/* ---------- 玩家信息：头像 + 名牌 ---------- */
+.info {
+  display: flex;
+  align-items: center;
+  gap: calc(0.9 * var(--uv));
+  padding: calc(0.7 * var(--uv)) calc(0.9 * var(--uv));
+  border-radius: calc(1.2 * var(--uv));
+  background: linear-gradient(165deg, rgba(6,32,27,0.88), rgba(3,18,15,0.94));
+  border: 1px solid rgba(233,196,106,0.28);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.info.active {
+  border-color: rgba(255,214,120,0.85);
+  box-shadow: 0 0 calc(2.2 * var(--uv)) rgba(255,206,110,0.55), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.info .avatar {
+  width: calc(4.4 * var(--uv));
+  height: calc(4.4 * var(--uv));
+  min-width: 26px; min-height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(11px, calc(1.9 * var(--uv)), 18px);
+  font-weight: 800; color: #2a1b0c;
+  border: 2px solid rgba(233,196,106,0.75);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.45), inset 0 -3px 6px rgba(0,0,0,0.15);
+}
+.info .av0 { background: linear-gradient(160deg,#ffe3a3,#e9b45a); }
+.info .av1 { background: linear-gradient(160deg,#bfe6ff,#6aa8d8); }
+.info .av2 { background: linear-gradient(160deg,#ffc9c2,#e07a6c); }
+.info .av3 { background: linear-gradient(160deg,#d8f3c2,#8fbf6a); }
+.info .body { flex: 1 1 auto; min-width: 0; }
+.info .wind {
+  border-radius: 50%;
+  background: linear-gradient(160deg, #f6d98a, #c8933a);
+  color: #2a1b0c;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+.info .name { text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+.info .score { font-size: clamp(14px, calc(2.2 * var(--uv)), 22px); letter-spacing: 0.02em; text-shadow: 0 2px 4px rgba(0,0,0,0.45); }
+
+/* ---------- 中央圆盘：罗盘 + 余牌 + 倒计时 ---------- */
+.core {
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background:
+    radial-gradient(circle at 50% 32%, rgba(18,63,53,0.94) 0%, rgba(6,26,22,0.96) 62%, rgba(3,16,13,0.98) 100%);
+  border: 1.5px solid rgba(233,196,106,0.40);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.55),
+    inset 0 2px 10px rgba(255,255,255,0.07),
+    inset 0 -10px 24px rgba(0,0,0,0.5);
+}
+.core .num {
+  font-size: clamp(26px, calc(5.4 * var(--uv)), 64px);
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(180deg, #fff4cf 0%, #ffd977 48%, #d79b32 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.55));
+  font-variant-numeric: tabular-nums;
+}
+.core .unit { color: rgba(240,220,170,0.62); letter-spacing: 0.28em; }
+.core .round { color: rgba(240,220,170,0.78); }
+.core .cd {
+  position: absolute;
+  bottom: calc(1.2 * var(--uv));
+  font-size: clamp(12px, calc(2.1 * var(--uv)), 20px);
+  font-weight: 900;
+  color: #ffe08a;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 8px rgba(255,200,90,0.65);
+}
+.core .cd.low { color: #ff9b7a; text-shadow: 0 0 10px rgba(255,110,80,0.8); animation: cdPulse 0.8s ease-in-out infinite; }
+@keyframes cdPulse { 0%,100% { opacity: 1 } 50% { opacity: 0.55 } }
+.core .compass {
+  position: absolute;
+  font-size: clamp(9px, calc(1.5 * var(--uv)), 14px);
+  color: rgba(240,220,170,0.55);
+  letter-spacing: 0.1em;
+}
+.core .cn { top: calc(-2.4 * var(--uv)); left: 50%; transform: translateX(-50%); }
+.core .cs { bottom: calc(-2.4 * var(--uv)); left: 50%; transform: translateX(-50%); }
+.core .cw { left: calc(-2.4 * var(--uv)); top: 50%; transform: translateY(-50%); }
+.core .ce { right: calc(-2.4 * var(--uv)); top: 50%; transform: translateY(-50%); }
+.core .compass.is-dealer { color: #ffd977; font-weight: 800; text-shadow: 0 0 8px rgba(255,200,90,0.6); }
+
+/* ---------- 按钮 ---------- */
+.act-btn {
+  border-radius: 999px;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+.act-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.act-btn:active { transform: translateY(2px) scale(0.98); box-shadow: 0 3px 8px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.2); }
+
+/* ---------- 中央大字事件 ---------- */
+#event .ev-main {
+  font-size: clamp(28px, calc(8 * var(--uv)), 92px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #fff8dd, #ffd062 55%, #c9871f);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+}
+
+/* ---------- 尺寸与位置微调（覆盖前文） ---------- */
+:root {
+  --tile-w: clamp(30px, min(calc(4.65 * var(--uh)), calc(9.8 * var(--uv))), 80px);
+}
+.hand-zone { bottom: calc(1.4 * var(--uv)); gap: calc(0.35 * var(--uv)); }
+
+/* 中央圆盘放大，罗盘字放到圆外 */
+.core {
+  width: clamp(116px, calc(19 * var(--uh)), 206px);
+}
+.core .compass { font-size: clamp(10px, calc(1.7 * var(--uv)), 15px); }
+.core .cn { top: calc(-3.4 * var(--uv)); }
+.core .cs { bottom: calc(-3.4 * var(--uv)); }
+.core .cw { left: calc(-3.4 * var(--uv)); }
+.core .ce { right: calc(-3.4 * var(--uv)); }
+
+/* 顶部按钮挪到右下空档，别压牌 */
+#topbar {
+  top: auto;
+  bottom: calc(13 * var(--uv));
+  right: calc(1.6 * var(--uh));
+  gap: 6px;
+}
+.icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(6,26,22,0.72);
+  border: 1px solid rgba(233,196,106,0.35);
+  color: rgba(240,220,170,0.9);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+.icon-btn:hover { background: rgba(233,196,106,0.18); }
+
+/* 副露行右移，避开左侧信息牌 */
+.meld-zone { left: calc(23 * var(--uh)); bottom: calc(17.5 * var(--uv)); }
+
+/* ---------- 中央盘二次调整：罗盘收进盘边、提示文字移出盘外 ---------- */
+.core { width: clamp(110px, calc(17 * var(--uh)), 188px); }
+.core .compass {
+  font-size: clamp(10px, calc(1.4 * var(--uv)), 13px);
+  color: rgba(240,220,170,0.42);
+  letter-spacing: 0.06em;
+}
+.core .cn { top: calc(1.6 * var(--uv)); left: 50%; transform: translateX(-50%); }
+.core .cs { bottom: calc(1.6 * var(--uv)); left: 50%; transform: translateX(-50%); }
+.core .cw { left: calc(1.8 * var(--uv)); top: 50%; transform: translateY(-50%); }
+.core .ce { right: calc(1.8 * var(--uv)); top: 50%; transform: translateY(-50%); }
+.core .num { font-size: clamp(22px, calc(4.6 * var(--uv)), 44px); }
+.core .round { margin-top: 2px; }
+.core .cd {
+  position: static;
+  margin-top: calc(0.6 * var(--uv));
+  font-size: clamp(11px, calc(1.7 * var(--uv)), 16px);
+}
+.core .hint-line {
+  position: absolute;
+  top: calc(100% + 1.4 * var(--uv));
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: clamp(9px, calc(1.3 * var(--uv)), 12px);
+  color: rgba(240,215,155,0.7);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  max-width: calc(34 * var(--uh));
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- 信息牌自适应：不要被挤成竖条 ---------- */
+.info .avatar { flex: 0 0 auto; }
+.info .row1 { flex-wrap: nowrap; overflow: hidden; }
+.info .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.info .body { min-width: 0; }
+#info-left .info, #info-right .info, #info-top .info { max-width: clamp(148px, calc(19 * var(--uh)), 224px); }
+#info-bottom .info { max-width: clamp(148px, calc(21 * var(--uh)), 240px); }
+
+/* 牌面图案略微放大，更接近真牌的饱满感 */
+.tile img { transform: scale(1.06); transform-origin: 50% 48%; }
+
+/* 信息牌：行1 不换行（优先级高于槽位规则） */
+#info-left .info .row1, #info-right .info .row1,
+#info-top .info .row1, #info-bottom .info .row1 {
+  flex-wrap: nowrap;
+  max-width: 100%;
+}
+.tile img { transform: scale(1.03); }
+
+/* ---------- 台面水印纹样（营造商业级质感） ---------- */
+#center::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: calc(58 * var(--uh));
+  height: calc(58 * var(--uh));
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%),
+    repeating-conic-gradient(from 0deg, rgba(255,255,255,0.035) 0deg 6deg, rgba(255,255,255,0) 6deg 12deg);
+  border: 1px solid rgba(233,196,106,0.10);
+  box-shadow: 0 0 0 calc(2.2 * var(--uh)) rgba(233,196,106,0.05);
+  pointer-events: none;
+  z-index: 0;
+}
+#center::after {
+  content: '监利红中';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  font-size: calc(9 * var(--uh));
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  color: rgba(233,196,106,0.075);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
+}
+#center .core, #center .river { z-index: 1; }
+
+/* ---------- 收尾微调 ---------- */
+.hand-zone { bottom: calc(2.2 * var(--uv)); }
+.hand-zone .tile { transform-origin: 50% 140%; }
+#event .ev-box { transform: translateY(-21vh); }
