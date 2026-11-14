@@ -1210,3 +1210,280 @@ body {
 .hand-zone { bottom: calc(2.2 * var(--uv)); }
 .hand-zone .tile { transform-origin: 50% 140%; }
 #event .ev-box { transform: translateY(-21vh); }
+
+/* ==================================================================
+   v7：按参考截图重做 —— 青绿台面 / 深木框 / 四面立牌墙 / 方形罗盘盘
+   ================================================================== */
+
+/* 台面：青绿 + 深棕木框 */
+#table {
+  border: calc(2.6 * var(--uv)) solid #4a2417;
+  border-image: none;
+  background:
+    radial-gradient(58% 62% at 50% 48%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 68%),
+    radial-gradient(130% 110% at 50% 46%, #1a7d70 0%, #0f6a60 40%, #0a544b 74%, #06382f 100%);
+  box-shadow:
+    inset 0 0 calc(16 * var(--uv)) calc(4 * var(--uv)) rgba(0,0,0,0.58),
+    0 0 0 1px rgba(255,220,170,0.16);
+}
+#table::after {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.022) 0 1px, rgba(0,0,0,0) 1px 3px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.04) 0 1px, rgba(0,0,0,0) 1px 4px);
+  mix-blend-mode: overlay;
+}
+
+/* 中央大圆环水印（台面花纹） */
+#center::before {
+  width: calc(46 * var(--uh));
+  height: calc(46 * var(--uh));
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0 42%, rgba(255,255,255,0) 70%),
+    repeating-conic-gradient(from 0deg, rgba(255,255,255,0.03) 0deg 4deg, rgba(255,255,255,0) 4deg 13deg);
+  border: calc(0.25 * var(--uv)) solid rgba(255,255,255,0.10);
+  box-shadow: 0 0 0 calc(0.5 * var(--uv)) rgba(0,0,0,0.06);
+}
+#center::after {
+  content: '真人麻将';
+  font-size: calc(7.6 * var(--uh));
+  color: rgba(255,255,255,0.06);
+  transform: translate(-50%, -50%) rotate(-90deg);
+  letter-spacing: 0.3em;
+}
+
+/* ---------------- 牌墙：白色牌面 + 绿色侧面，两排错位 ---------------- */
+.wall { position: absolute; z-index: 2; }
+.wall .wrow { display: flex; gap: calc(0.22 * var(--uv)); }
+.wall.top { left: 50%; transform: translateX(-50%); top: calc(7.4 * var(--uv)); }
+.wall.top .wrow + .wrow { margin-left: calc(var(--wall-w) * 0.55); margin-top: calc(0.5 * var(--uv)); }
+.wall.left, .wall.right { top: calc(9.5 * var(--uv)); flex-direction: column; }
+.wall.left { left: calc(1.4 * var(--uh)); }
+.wall.right { right: calc(1.4 * var(--uh)); }
+.wall.left .wrow, .wall.right .wrow { flex-direction: column; gap: calc(0.22 * var(--uv)); }
+.wall.left .wrow + .wrow, .wall.right .wrow + .wrow { margin-top: calc(var(--wall-h) * 0.55); }
+
+:root {
+  --wall-w: clamp(16px, calc(2.5 * var(--uh)), 34px);
+  --wall-h: calc(var(--wall-w) * 1.36);
+}
+.tile.wall-back {
+  width: var(--wall-w);
+  height: var(--wall-h);
+  border-radius: calc(var(--wall-w) * 0.1);
+  background: linear-gradient(175deg, #fdfcf5 0%, #f1ede0 62%, #e2ddcc 100%);
+  border-bottom: calc(var(--wall-w) * 0.16) solid #1f7d5f;
+  box-shadow:
+    0 calc(var(--wall-w) * 0.12) calc(var(--wall-w) * 0.18) rgba(0,0,0,0.42),
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(120,110,80,0.14);
+  overflow: hidden;
+}
+
+/* 自己这面的牌墙：在手牌上方左右两段 */
+.self-wall {
+  position: absolute; left: calc(1.4 * var(--uh)); right: calc(1.4 * var(--uh));
+  bottom: calc(13.4 * var(--uv));
+  display: flex; justify-content: space-between; align-items: flex-end;
+  pointer-events: none;
+}
+.self-wall .wrow { display: flex; gap: calc(0.22 * var(--uv)); }
+
+/* ---------------- 中央方形罗盘盘 ---------------- */
+.core {
+  width: clamp(96px, calc(13.5 * var(--uh)), 176px);
+  aspect-ratio: 1 / 1.02;
+  border-radius: calc(1.4 * var(--uv));
+  border: calc(0.28 * var(--uv)) solid #7a5330;
+  background:
+    linear-gradient(180deg, #38413f 0%, #232b2b 46%, #121a1c 100%);
+  box-shadow:
+    0 calc(1.2 * var(--uv)) calc(2.4 * var(--uv)) rgba(0,0,0,0.6),
+    inset 0 calc(0.4 * var(--uv)) calc(1.2 * var(--uv)) rgba(255,255,255,0.10),
+    inset 0 calc(-1 * var(--uv)) calc(1.8 * var(--uv)) rgba(0,0,0,0.55),
+    0 0 0 1px rgba(233,196,106,0.22);
+}
+.dial {
+  position: absolute; inset: calc(0.6 * var(--uv));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: calc(1 * var(--uv));
+  border: 1px solid rgba(255,235,200,0.12);
+}
+.dial .cd {
+  position: static;
+  font-size: clamp(20px, calc(4.2 * var(--uv)), 44px);
+  font-weight: 900;
+  line-height: 1;
+  color: #c9ecff;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 calc(1.2 * var(--uv)) rgba(120,210,255,0.85), 0 2px 3px rgba(0,0,0,0.6);
+}
+.dial .cd.low { color: #ffdc9a; text-shadow: 0 0 calc(1.2 * var(--uv)) rgba(255,180,80,0.9); }
+.dial .dial-info {
+  margin-top: calc(0.7 * var(--uv));
+  font-size: clamp(8px, calc(1.15 * var(--uv)), 12px);
+  color: rgba(235,225,205,0.72);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.dial .dial-info b { color: #ffd977; font-weight: 800; }
+.dial .dial-dir {
+  position: absolute;
+  font-size: clamp(9px, calc(1.3 * var(--uv)), 13px);
+  font-weight: 700;
+  color: rgba(240,232,210,0.55);
+}
+.dial .dial-dir.top { top: calc(1 * var(--uv)); left: 50%; transform: translateX(-50%); }
+.dial .dial-dir.bottom { bottom: calc(1 * var(--uv)); left: 50%; transform: translateX(-50%); }
+.dial .dial-dir.left { left: calc(1.2 * var(--uv)); top: 50%; transform: translateY(-50%); }
+.dial .dial-dir.right { right: calc(1.2 * var(--uv)); top: 50%; transform: translateY(-50%); }
+.dial .dial-dir.is-dealer { color: #ffe08a; text-shadow: 0 0 calc(0.9 * var(--uv)) rgba(255,200,90,0.8); }
+/* 指庄三角 */
+.dial-tri {
+  position: absolute;
+  width: 0; height: 0;
+  border-left: calc(1.1 * var(--uv)) solid transparent;
+  border-right: calc(1.1 * var(--uv)) solid transparent;
+  border-top: calc(1.5 * var(--uv)) solid #3ddc84;
+  filter: drop-shadow(0 0 4px rgba(60,220,130,0.75));
+  animation: triPulse 1.4s ease-in-out infinite;
+}
+.dial-tri.top { top: calc(-1.5 * var(--uv)); left: 50%; transform: translateX(-50%); border-top: none; border-bottom: calc(1.5 * var(--uv)) solid #3ddc84; }
+.dial-tri.bottom { bottom: calc(-1.5 * var(--uv)); left: 50%; transform: translateX(-50%); }
+.dial-tri.left { left: calc(-1.5 * var(--uv)); top: 50%; transform: translateY(-50%) rotate(90deg); }
+.dial-tri.right { right: calc(-1.5 * var(--uv)); top: 50%; transform: translateY(-50%) rotate(-90deg); }
+@keyframes triPulse { 0%,100% { opacity: 1 } 50% { opacity: 0.55 } }
+.dial .hint-line {
+  position: absolute;
+  top: calc(100% + 1.2 * var(--uv));
+  left: 50%; transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: clamp(9px, calc(1.25 * var(--uv)), 12px);
+  color: rgba(240,224,190,0.72);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* 旧圆盘遗留元素隐藏 */
+.core .num, .core .unit, .core .round, .core .compass { display: none !important; }
+
+/* ---------- v7 修正：牌墙紧凑成条、中央盘居中放大 ---------- */
+:root { --wall-w: clamp(13px, calc(1.72 * var(--uh)), 25px); --wall-h: calc(var(--wall-w) * 1.36); }
+.wall { display: flex; gap: calc(0.12 * var(--uv)); flex-direction: row; }
+.wall.left, .wall.right { flex-direction: column; gap: calc(0.12 * var(--uv)); }
+.wall.top { top: calc(6.4 * var(--uv)); }
+.wall.left { left: calc(1.2 * var(--uh)); top: calc(8.6 * var(--uv)); }
+.wall.right { right: calc(1.2 * var(--uh)); top: calc(8.6 * var(--uv)); }
+.tile.wall-back { border-bottom: calc(var(--wall-w) * 0.13) solid #1c7a5c; }
+
+/* 中央盘：真正居中、再大一点 */
+.center { position: absolute; inset: 0; }
+.core {
+  width: clamp(112px, calc(15.5 * var(--uh)), 196px);
+  left: 50%; top: 50%;
+}
+.dial .cd { font-size: clamp(22px, calc(4.8 * var(--uv)), 48px); }
+.dial .dial-info { font-size: clamp(8px, calc(1.2 * var(--uv)), 13px); }
+
+/* 自己面牌墙分两段，避开中间操作区 */
+.self-wall { bottom: calc(14.4 * var(--uv)); left: calc(1.2 * var(--uh)); right: calc(1.2 * var(--uh)); }
+.self-wall .wrow { gap: calc(0.12 * var(--uv)); }
+
+/* 大字事件再上移，别压盘 */
+#event .ev-box { transform: translateY(-30vh); }
+
+/* ---------- 墙面独立图层 ---------- */
+.wall-layer { position: absolute; display: flex; z-index: 2; }
+#wall-top {
+  left: calc(9 * var(--uh)); right: calc(9 * var(--uh));
+  top: calc(5.6 * var(--uv));
+  justify-content: center;
+  gap: calc(0.12 * var(--uv));
+}
+#wall-bottom {
+  left: calc(16 * var(--uh)); right: calc(16 * var(--uh));
+  bottom: calc(14.2 * var(--uv));
+  justify-content: space-between;
+  align-items: flex-end;
+}
+#wall-bottom .wseg { display: flex; gap: calc(0.12 * var(--uv)); }
+#wall-left, #wall-right {
+  top: calc(9.2 * var(--uv)); bottom: calc(16 * var(--uv));
+  flex-direction: column;
+  gap: calc(0.12 * var(--uv));
+  align-content: flex-start;
+}
+#wall-left { left: calc(1.1 * var(--uh)); }
+#wall-right { right: calc(1.1 * var(--uh)); }
+#wall-left, #wall-right { justify-content: flex-start; }
+
+.center { left: calc(10 * var(--uh)); right: calc(10 * var(--uh)); top: calc(16.5 * var(--uv)); bottom: calc(32 * var(--uv)); }
+
+/* ---------- 墙面质感：连续厚墙 ---------- */
+:root { --wall-w: clamp(15px, calc(1.95 * var(--uh)), 28px); --wall-h: calc(var(--wall-w) * 1.34); }
+.wall-layer { gap: 0 !important; }
+#wall-bottom .wseg { gap: 0; }
+.tile.wall-back {
+  border-radius: calc(var(--wall-w) * 0.08);
+  border-bottom: calc(var(--wall-w) * 0.17) solid #1d7d5f;
+  border-right: 1px solid rgba(0,0,0,0.16);
+  background: linear-gradient(178deg, #fffdf7 0%, #f2eee1 58%, #e4dfd0 100%);
+  box-shadow:
+    0 calc(var(--wall-w) * 0.10) calc(var(--wall-w) * 0.16) rgba(0,0,0,0.38),
+    inset 0 1px 0 #fff,
+    inset -1px 0 0 rgba(255,255,255,0.6),
+    inset 0 0 0 1px rgba(120,110,80,0.10);
+}
+
+/* ---------- 中央盘金属质感 ---------- */
+.core {
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 34%),
+    linear-gradient(180deg, #3a4442 0%, #232b2b 50%, #0f1719 100%);
+  border: calc(0.30 * var(--uv)) solid #7d5633;
+  box-shadow:
+    0 calc(1.4 * var(--uv)) calc(2.6 * var(--uv)) rgba(0,0,0,0.62),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 calc(-1.2 * var(--uv)) calc(2 * var(--uv)) rgba(0,0,0,0.6),
+    0 0 0 1px rgba(233,196,106,0.26);
+}
+.dial .dial-dir { font-size: clamp(10px, calc(1.5 * var(--uv)), 14px); color: rgba(245,238,220,0.62); }
+.dial .cd { font-size: clamp(24px, calc(5.2 * var(--uv)), 52px); }
+
+/* ---------- 头像：金色圆环 + 金币数字 ---------- */
+.info .avatar {
+  border: 2px solid rgba(255,214,120,0.85);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.5), inset 0 -4px 8px rgba(0,0,0,0.18);
+}
+.info .score { color: #ffdf8a; }
+.info .score::before { content: '¥'; font-size: 0.72em; margin-right: 1px; opacity: 0.8; }
+
+/* ---------- 收尾：去掉中间暗色方块，微调尺寸 ---------- */
+.center { background: none; box-shadow: none; border-radius: 0; }
+:root { --tile-w: clamp(28px, min(calc(4.3 * var(--uh)), calc(9.2 * var(--uv))), 72px); }
+.hand-zone { bottom: calc(2.6 * var(--uv)); }
+.dial .dial-dir { font-size: clamp(11px, calc(1.75 * var(--uv)), 16px); font-weight: 800; color: rgba(250,242,225,0.78); }
+.dial .dial-dir.top { top: calc(0.4 * var(--uv)); }
+.dial .dial-dir.bottom { bottom: calc(0.4 * var(--uv)); }
+.dial .dial-dir.left { left: calc(0.7 * var(--uv)); }
+.dial .dial-dir.right { right: calc(0.7 * var(--uv)); }
+#event .ev-box { transform: translateY(-34vh); }
+
+/* ---------- 墙面避开按钮 / 旋转模式按钮归位 ---------- */
+#wall-right { bottom: calc(24 * var(--uv)); }
+body.rotated #topbar {
+  top: auto;
+  bottom: calc(3.4 * var(--uv));
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+body.rotated .icon-btn { width: 26px; height: 26px; opacity: 0.7; }
+
+/* 旋转模式下顶墙下移，避开左上信息牌 */
+body.rotated #wall-left { top: calc(22 * var(--uv)); }
+body.rotated #wall-left { bottom: calc(26 * var(--uv)); }
+
+/* 左右家副露下移，别顶到信息牌 */
+@media (min-height: 561px) {
+  .seat.left .meld-row, .seat.right .meld-row { top: calc(34 * var(--uv)); }
+}

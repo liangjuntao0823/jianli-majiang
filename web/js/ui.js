@@ -194,6 +194,7 @@ function detectEvents(s) {
 export function renderAll() {
   const s = st();
   detectEvents(s);
+  renderWalls();
   G.timerFill = null;
   for (let seat = 0; seat < 4; seat++) {
     renderSeat(seat);
@@ -396,17 +397,40 @@ function onTileClick(raw, drawn) {
 
 function renderOppHand(box, seat) {
   const p = st().players[seat];
-  const zone = el('div', 'opp-hand');
   const pos = posOf(seat);
   const n = p.handCount !== undefined ? p.handCount : p.hand.length;
-  for (let i = 0; i < n; i++) zone.append(el('div', 'tile hand-back'));
-  box.append(zone);
+
 
   if (p.melds.length > 0 || p.redsPlayed > 0) {
     const row = el('div', 'meld-row');
     for (const m of p.melds) row.append(meldGroupEl(m));
     if (p.redsPlayed > 0) row.append(redZoneEl(p, true));
     box.append(row);
+  }
+}
+
+function renderWalls() {
+  const s = st();
+  for (const pos of POS) {
+    const layer = document.getElementById('wall-' + pos);
+    if (layer) layer.innerHTML = '';
+  }
+  for (let seat = 0; seat < 4; seat++) {
+    const pos = posOf(seat);
+    const layer = document.getElementById('wall-' + pos);
+    if (!layer) continue;
+    const p = s.players[seat];
+    const n = p.handCount !== undefined ? p.handCount : p.hand.length;
+    if (pos === 'bottom') {
+      const half = Math.ceil(n / 2);
+      const a = el('div', 'wseg');
+      const b = el('div', 'wseg');
+      for (let i = 0; i < half; i++) a.append(el('div', 'tile wall-back'));
+      for (let i = half; i < n; i++) b.append(el('div', 'tile wall-back'));
+      layer.append(a, b);
+    } else {
+      for (let i = 0; i < n; i++) layer.append(el('div', 'tile wall-back'));
+    }
   }
 }
 
@@ -442,24 +466,34 @@ function renderCore() {
   const s = st();
   const core = document.getElementById('core');
   core.innerHTML = '';
-  // 四向罗盘，围在中央圆盘外侧
-  const DIRS = [['北', 'cn'], ['东', 'ce'], ['南', 'cs'], ['西', 'cw']];
-  for (const [txt, cls] of DIRS) {
-    const d = el('span', 'compass ' + cls, txt);
-    if (SEAT_LABEL[s.dealer] === txt) d.classList.add('is-dealer');
-    core.append(d);
+  const dial = el('div', 'dial');
+
+  // 指向庄家的绿色三角
+  const dealerPos = posOf(s.dealer);
+  const tri = el('div', 'dial-tri ' + dealerPos);
+  dial.append(tri);
+
+  // 四方位
+  const dirs = [['北', 'top'], ['南', 'bottom'], ['西', 'left'], ['东', 'right']];
+  for (const [txt, side] of dirs) {
+    const d = el('span', 'dial-dir ' + side, txt);
+    if (side === dealerPos) d.classList.add('is-dealer');
+    dial.append(d);
   }
-  core.append(el('div', 'num', String(s.wall.remaining)));
-  core.append(el('div', 'unit', '张'));
-  const round = el('div', 'round');
-  round.innerHTML = `${SEAT_LABEL[s.dealer]}庄 <b>${s.roundIndex}</b>/${G.totalRounds}`;
-  core.append(round);
-  core.append(el('div', 'cd', '30'));
+
+  // 中央倒计时大数字（updateTimer 会刷新）
+  dial.append(el('div', 'cd', '30'));
+
+  const info = el('div', 'dial-info');
+  info.innerHTML = `余 <b>${s.wall.remaining}</b> 张 · ${SEAT_LABEL[s.dealer]}庄 <b>${s.roundIndex}</b>/${G.totalRounds}`;
+  dial.append(info);
+
   if (G.hintText) {
     const line = el('div', 'hint-line');
     line.innerHTML = G.hintText;
-    core.append(line);
+    dial.append(line);
   }
+  core.append(dial);
 }
 
 /* ---------------- 操作区 ---------------- */
