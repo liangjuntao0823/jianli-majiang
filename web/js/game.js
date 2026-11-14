@@ -10,7 +10,7 @@ import { openLAN } from './net.js';
 import { openP2P } from './p2p.js';
 
 const PLAY_SECONDS = 30;
-const CLAIM_SECONDS = 8;
+const CLAIM_SECONDS = 30;
 const BOT_DELAY = 850;
 
 const S = {

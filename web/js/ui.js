@@ -1,5 +1,6 @@
 /* 牌桌渲染 + 输入 */
 import { tileImage, tileSrc, label, RED_RAW, SEAT_LABEL } from './tiles.js';
+import { waitingTiles } from './win.js';
 
 export const G = {
   getState: null,
@@ -115,6 +116,7 @@ export function renderAll() {
   }
   renderCore();
   renderActions();
+  renderWaits();
 }
 
 function renderSeat(seat) {
@@ -123,12 +125,14 @@ function renderSeat(seat) {
   const pos = posOf(seat);
   const box = document.getElementById('seat-' + pos);
   box.innerHTML = '';
+  const slot = document.getElementById('info-' + pos);
+  if (slot) slot.innerHTML = '';
 
   const info = el('div', 'info' + (s.current === seat && s.phase !== 'finished' ? ' active' : ''));
   const row1 = el('div', 'row1');
   row1.append(el('span', 'wind', SEAT_LABEL[seat]), el('span', 'name', p.name));
   if (s.current === seat && s.phase !== 'finished') row1.append(el('span', 'tag live', '出牌中'));
-  if (p.isBot) row1.append(el('span', 'tag', '机器人'));
+  if (p.isBot) row1.append(el('span', 'tag bot', '机器人'));
   if (seat === s.dealer) row1.append(el('span', 'tag dealer', '庄'));
   if (p.redsPlayed > 0) row1.append(el('span', 'tag red', '皮 ' + p.redsPlayed));
   const row2 = el('div', 'row2');
@@ -143,7 +147,7 @@ function renderSeat(seat) {
   info.append(track);
   if (s.current === seat && s.phase !== 'finished') G.timerFill = fill;
 
-  box.append(info);
+  if (slot) slot.append(info);
 
   if (pos === 'bottom') {
     renderMyMeld(box, seat);
@@ -153,22 +157,53 @@ function renderSeat(seat) {
   }
 }
 
-function renderMyMeld(box, seat) {
-  const p = st().players[seat];
-  const zone = el('div', 'meld-zone');
-  for (const m of p.melds) {
-    const g = el('div', 'meld-group');
-    const n = m.kind === 'peng' ? 3 : 4;
-    for (let i = 0; i < n; i++) g.append(tileEl(m.tile, { cls: 'meld' }));
-    zone.append(g);
+/* 一组副露：碰 3 张明；杠 4 张，第 4 张压在右上角
+ * 暗杠：下面 3 张暗的，上面 1 张明的
+ * 回头笑（点杠）：下面 3 张明的，上面 1 张暗的
+ * 蓄杠：4 张全明
+ */
+function meldGroupEl(m) {
+  const g = el('div', 'meld-group' + (m.kind && m.kind.startsWith('gang') ? ' gang' : ''));
+  const face = () => tileEl(m.tile, { cls: 'meld' });
+  const back = () => el('div', 'tile hand-back meld');
+  if (m.kind === 'gangConcealed') {
+    g.append(back(), back(), back());
+    const st4 = el('div', 'stack');
+    st4.append(face());
+    g.append(st4);
+  } else if (m.kind === 'gangExposed') {
+    g.append(face(), face(), face());
+    const st4 = el('div', 'stack');
+    st4.append(back());
+    g.append(st4);
+  } else if (m.kind === 'gangAdded') {
+    g.append(face(), face(), face());
+    const st4 = el('div', 'stack');
+    st4.append(face());
+    g.append(st4);
+  } else {
+    g.append(face(), face(), face());
   }
-  const rz = el('div', 'red-zone');
-  rz.append(el('span', 'lbl', '皮子'));
+  return g;
+}
+
+/* 台面上的皮子（红中）——四家都看得到 */
+function redZoneEl(p, small) {
+  const rz = el('div', small ? 'red-zone small' : 'red-zone');
   if (p.redsPlayed > 0) {
-    for (let i = 0; i < p.redsPlayed; i++) rz.append(tileEl(RED_RAW, { cls: 'red-mark' }));
+    for (let i = 0; i < p.redsPlayed; i++) rz.append(tileEl(RED_RAW, { cls: small ? 'red-mark tiny' : 'red-mark' }));
   } else {
     rz.append(el('span', 'empty', '—'));
   }
+  return rz;
+}
+
+function renderMyMeld(box, seat) {
+  const p = st().players[seat];
+  const zone = el('div', 'meld-zone');
+  for (const m of p.melds) zone.append(meldGroupEl(m));
+  const rz = redZoneEl(p, false);
+  rz.insertBefore(el('span', 'lbl', '皮子'), rz.firstChild);
   zone.append(rz);
   box.append(zone);
 }
@@ -221,17 +256,12 @@ function renderOppHand(box, seat) {
   for (let i = 0; i < n; i++) zone.append(el('div', 'tile hand-back'));
   box.append(zone);
 
-  if (p.melds.length > 0) {
+  if (p.melds.length > 0 || p.redsPlayed > 0) {
     const row = el('div', 'meld-row');
-    for (const m of p.melds) {
-      const g = el('div', 'meld-group');
-      const cnt = m.kind === 'peng' ? 3 : 4;
-      for (let i = 0; i < cnt; i++) g.append(tileEl(m.tile, { cls: 'meld' }));
-      row.append(g);
-    }
+    for (const m of p.melds) row.append(meldGroupEl(m));
+    if (p.redsPlayed > 0) row.append(redZoneEl(p, true));
     box.append(row);
   }
-  // 对家/左右 的皮子数已在信息牌展示
 }
 
 function renderRiver(seat) {
@@ -239,7 +269,12 @@ function renderRiver(seat) {
   const p = s.players[seat];
   const box = document.getElementById('river-' + posOf(seat));
   box.innerHTML = '';
-  for (const raw of p.river) box.append(tileEl(raw, { cls: 'mini' }));
+  const pendingSeat = s.phase === 'awaitingClaim' && s.pending ? s.pending.discarder : -1;
+  p.river.forEach((raw, i) => {
+    const t = tileEl(raw, { cls: 'mini' });
+    if (seat === pendingSeat && i === p.river.length - 1) t.classList.add('raised');
+    box.append(t);
+  });
 }
 
 function renderCore() {
@@ -251,6 +286,11 @@ function renderCore() {
   const round = el('div', 'round');
   round.innerHTML = `${SEAT_LABEL[s.dealer]}庄 <b>${s.roundIndex}</b>/${G.totalRounds}`;
   core.append(round);
+  if (G.hintText) {
+    const line = el('div', 'hint-line');
+    line.innerHTML = G.hintText;
+    core.append(line);
+  }
 }
 
 /* ---------------- 操作区 ---------------- */
@@ -262,10 +302,13 @@ function btn(text, onClick, cls = '') {
 }
 
 function setHint(text) {
-  const h = document.getElementById('hint');
-  if (!text) { h.classList.add('hidden'); return; }
-  h.innerHTML = text;
-  h.classList.remove('hidden');
+  G.hintText = text || null;
+  const core = document.getElementById('core');
+  if (!core) return;
+  let line = core.querySelector('.hint-line');
+  if (!text) { if (line) line.remove(); return; }
+  if (!line) { line = el('div', 'hint-line'); core.append(line); }
+  line.innerHTML = text;
 }
 
 function renderActions() {
@@ -281,9 +324,9 @@ function renderActions() {
   if (s.phase === 'awaitingClaim' && s.pending && pendingOpts) {
     const disc = s.players[s.pending.discarder];
     setHint(`<b>${disc.name}</b> 打出 ${label(s.pending.tile)}`);
-    if (pendingOpts.includes('peng')) acts.append(btn('碰', () => G.onAct({ type: 'peng' })));
-    if (pendingOpts.includes('gang')) acts.append(btn('杠', () => G.onAct({ type: 'gangExposed' })));
-    acts.append(btn('过', () => G.onAct({ type: 'pass' })));
+    if (pendingOpts.includes('peng')) acts.append(btn('碰', () => G.onAct({ type: 'peng' }), 'peng'));
+    if (pendingOpts.includes('gang')) acts.append(btn('杠', () => G.onAct({ type: 'gangExposed' }), 'gang'));
+    acts.append(btn('过', () => G.onAct({ type: 'pass' }), 'pass'));
     return;
   }
 
@@ -292,8 +335,8 @@ function renderActions() {
     const opts = G.getMyActions ? G.getMyActions() : [];
     if (opts.some((o) => o.type === 'hu')) acts.append(btn('胡', () => G.onAct({ type: 'hu' }), 'hu'));
     for (const o of opts) {
-      if (o.type === 'gangConcealed') acts.append(btn('暗杠 ' + label(o.tile), () => G.onAct(o)));
-      if (o.type === 'gangAdded') acts.append(btn('蓄杠 ' + label(o.tile), () => G.onAct(o)));
+      if (o.type === 'gangConcealed') acts.append(btn('暗杠 ' + label(o.tile), () => G.onAct(o), 'gang'));
+      if (o.type === 'gangAdded') acts.append(btn('蓄杠 ' + label(o.tile), () => G.onAct(o), 'gang'));
     }
     setHint(G.selected ? '再点一次打出' : '点牌选中，再点打出');
     return;
@@ -308,6 +351,21 @@ function renderActions() {
   } else {
     setHint(null);
   }
+}
+
+/* ---------------- 听牌 ---------------- */
+function renderWaits() {
+  const box = document.getElementById('waits');
+  if (!box) return;
+  const s = st();
+  box.innerHTML = '';
+  const p = s.players[G.humanSeat];
+  if (!p || s.phase === 'finished') { box.classList.remove('show'); return; }
+  const waits = waitingTiles(p.hand, p.melds.length);
+  if (!waits.length) { box.classList.remove('show'); return; }
+  box.append(el('span', 'w-lbl', '听'));
+  for (const w of waits) box.append(el('span', 'w-tile', label(w)));
+  box.classList.add('show');
 }
 
 /* ---------------- 计时 / 提示 ---------------- */

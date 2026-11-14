@@ -234,9 +234,9 @@ body::after {
 
 /* 顶部/左右 别人的手牌 */
 .opp-hand { position: absolute; display: flex; gap: 3px; }
-.seat.top .opp-hand { left: 50%; transform: translateX(-50%); top: 6.6vh; }
-.seat.left .opp-hand { flex-direction: column; left: 1.6vw; top: 5.6vh; }
-.seat.right .opp-hand { flex-direction: column; right: 1.6vw; top: 5.6vh; }
+.seat.top .opp-hand { left: 50%; transform: translateX(-50%); top: 8.2vh; }
+.seat.left .opp-hand { flex-direction: column; left: 1.6vw; top: 8vh; }
+.seat.right .opp-hand { flex-direction: column; right: 1.6vw; top: 8vh; }
 .seat.left .opp-hand .tile.hand-back,
 .seat.right .opp-hand .tile.hand-back {
   width: calc(var(--back-w) * 1.4);
@@ -305,7 +305,7 @@ body::after {
 /* 操作按钮 */
 #actions {
   position: absolute;
-  left: 50%; bottom: 33.5vh;
+  left: 50%; bottom: 20vh;
   transform: translateX(-50%);
   display: flex; gap: 10px;
   z-index: 12;
@@ -552,3 +552,124 @@ body::after {
   padding: 0 16px env(safe-area-inset-bottom);
 }
 @media (display-mode: standalone) { #home-tip { display: none; } }
+
+
+/* ---------- 信息牌槽位（四角，独立于座位，不压牌） ---------- */
+.info-slot { position: absolute; z-index: 9; pointer-events: none; }
+.info-slot .info { position: static; }
+#info-left   { left: 0.8vw;  top: 0.7vh; }
+#info-top    { left: 14vw;   top: 0.7vh; }
+#info-right  { right: 0.8vw; top: 0.7vh; }
+#info-bottom { left: 1.2vw;  bottom: 15vh; }
+#info-left .info, #info-right .info, #info-top .info { min-width: 0; max-width: 14vw; }
+#info-bottom .info { min-width: 0; max-width: 12vw; }
+#info-left .info .row1, #info-right .info .row1, #info-top .info .row1 { flex-wrap: wrap; max-width: 13vw; }
+#info-bottom .info .row1 { flex-wrap: wrap; max-width: 11vw; }
+#topbar { top: auto; bottom: 1vh; right: 1.2vw; }
+
+/* ---------- 副露堆叠：暗杠 3 暗 + 1 明；回头笑 3 明 + 1 暗 ---------- */
+.meld-group { position: relative; display: flex; align-items: flex-end; gap: 2px; }
+.meld-group.gang { position: relative; }
+.meld-group.gang > .stack {
+  position: absolute;
+  right: calc(var(--river-w) * 0.30);
+  top: calc(var(--river-w) * -0.62);
+  display: flex; z-index: 3;
+}
+.meld-group.gang > .stack .tile.meld { box-shadow: -2px -2px 0 rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.5); }
+.meld-group.gang > .stack .tile.hand-back.meld {
+  width: calc(var(--river-w) * 1.06); height: calc(var(--river-w) * 1.48); border-radius: calc(var(--river-w) * 0.12);
+}
+
+/* 皮子小牌（他家台面） */
+.red-zone.small { gap: 2px; }
+.red-mark.tiny { width: calc(var(--river-w) * 0.44); height: calc(var(--river-w) * 0.62); }
+/* 侧家牌更小，堆叠偏移同比缩小 */
+.seat.left .meld-group.gang > .stack,
+.seat.right .meld-group.gang > .stack {
+  right: calc(var(--river-w) * -0.09);
+  top: calc(var(--river-w) * -0.32);
+}
+
+/* ---------- 牌河：被打出的那张举高 ---------- */
+.tile.mini.raised {
+  transform: translateY(-42%) scale(1.06);
+  box-shadow: 0 0 0 2px var(--gold), 0 10px 20px rgba(0,0,0,0.6);
+  z-index: 7;
+}
+
+/* ---------- 操作按钮：更大更醒目 ---------- */
+.act-btn {
+  padding: clamp(10px,1.8vh,16px) clamp(22px,3vw,40px);
+  font-size: clamp(16px,2.6vh,22px);
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  border-width: 2px;
+}
+.act-btn.peng {
+  color: #12211d;
+  background: linear-gradient(180deg, #ffe6a3, #e9c46a);
+  border-color: #fff5cf;
+  box-shadow: 0 0 22px rgba(233,196,106,0.6), 0 6px 16px rgba(0,0,0,0.45);
+}
+.act-btn.gang {
+  color: #0b1130;
+  background: linear-gradient(180deg, #b8c8ff, #6d86e8);
+  border-color: #dbe4ff;
+  box-shadow: 0 0 22px rgba(120,150,255,0.6), 0 6px 16px rgba(0,0,0,0.45);
+}
+.act-btn.hu {
+  color: #fff;
+  background: linear-gradient(180deg, #ff9a6b, #e2352a);
+  border-color: #ffd2c0;
+  animation: huPulse 0.9s ease-in-out infinite;
+}
+@keyframes huPulse {
+  0%, 100% { box-shadow: 0 0 14px rgba(226,53,42,0.55), 0 6px 16px rgba(0,0,0,0.45); transform: scale(1); }
+  50%      { box-shadow: 0 0 34px rgba(255,110,90,0.95), 0 8px 20px rgba(0,0,0,0.5); transform: scale(1.04); }
+}
+.act-btn.pass {
+  color: rgba(243,236,216,0.65);
+  background: rgba(4,20,17,0.85);
+  border-color: rgba(243,236,216,0.28);
+  font-size: clamp(13px,2vh,16px);
+  letter-spacing: 0.1em;
+}
+
+/* ---------- 听牌提示 ---------- */
+#waits {
+  position: absolute; left: 1.3vw; bottom: 32vh;
+  display: none; flex-wrap: wrap; gap: 5px; align-items: center; max-width: 26vw;
+  padding: 6px 10px; border-radius: 10px;
+  background: rgba(4,20,17,0.8); border: 1px solid rgba(233,196,106,0.38);
+  z-index: 9;
+}
+#waits.show { display: flex; }
+#waits .w-lbl { font-size: clamp(10px,1.5vh,13px); color: var(--gold); font-weight: 700; }
+#waits .w-tile { font-size: clamp(10px,1.5vh,13px); color: #9fe6c8; font-weight: 800; }
+
+/* ---------- 中央提示行 ---------- */
+.core .hint-line { margin-top: 6px; font-size: clamp(10px,1.6vh,13px); color: rgba(240,215,155,0.72); text-align: center; max-width: 26vh; line-height: 1.35; }
+
+/* ---------- 强制横屏 ---------- */
+#rotate-tip { flex-direction: column; gap: 16px; }
+#rotate-tip .rot-ico { font-size: clamp(40px, 9vh, 72px); color: var(--gold); animation: rotSpin 2.2s linear infinite; }
+@keyframes rotSpin { from { transform: rotate(0) } to { transform: rotate(360deg) } }
+#rotate-tip .rot-main { font-size: clamp(18px, 3.4vh, 26px); font-weight: 800; letter-spacing: 0.14em; }
+#rotate-tip .rot-sub { font-size: clamp(12px, 2vh, 15px); color: rgba(243,236,216,0.6); letter-spacing: 0.04em; }
+
+/* 竖屏强制遮挡（放最后以覆盖基础规则） */
+@media (max-aspect-ratio: 1/1) {
+  #rotate-tip { display: flex; }
+}
+
+/* 矮屏（手机横屏）信息牌收紧 */
+@media (max-height: 500px) {
+  .info { padding: 4px 7px; gap: 1px; border-radius: 9px; }
+  .info .name { font-size: 11px; }
+  .info .wind { width: 16px; height: 16px; font-size: 10px; }
+  .info .score { font-size: 12px; }
+  .info .tag { font-size: 8px; padding: 0 4px; }
+  .info .tag.bot { display: none; }
+  .info .timer-track { margin-top: 2px; }
+}

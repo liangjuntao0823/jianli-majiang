@@ -19,7 +19,7 @@ export const DEFAULT_RULE = {
   allowSevenPairs: true,
   redAsPizi: true,
   playSeconds: 30,
-  claimSeconds: 8,
+  claimSeconds: 30,
   rounds: 8,
 };
 
