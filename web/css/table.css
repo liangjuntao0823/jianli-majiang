@@ -672,8 +672,8 @@ body.rotated #result {
   position: fixed;
   top: 0;
   left: 0;
-  width: calc(var(--uv) * 100);
-  height: calc(var(--uh) * 100);
+  width: calc(var(--uh) * 100);   /* 旋转前宽 = 屏幕高 */
+  height: calc(var(--uv) * 100);  /* 旋转前高 = 屏幕宽 */
   transform-origin: top left;
   transform: rotate(90deg) translateY(-100%);
 }

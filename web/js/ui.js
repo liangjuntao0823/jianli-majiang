@@ -88,8 +88,10 @@ export function applyLayoutUnits() {
   const w = window.innerWidth, h = window.innerHeight;
   const portrait = h >= w;
   const root = document.documentElement;
-  root.style.setProperty('--uv', (h / 100) + 'px');
-  root.style.setProperty('--uh', (w / 100) + 'px');
+  // --uv：布局里的“垂直”单位；--uh：布局里的“水平”单位。
+  // 竖屏旋转 90° 后，元素 CSS 宽 = 屏幕高、CSS 高 = 屏幕宽，两者要对调。
+  root.style.setProperty('--uv', ((portrait ? w : h) / 100) + 'px');
+  root.style.setProperty('--uh', ((portrait ? h : w) / 100) + 'px');
   document.body.classList.toggle('rotated', portrait);
   const logicalH = portrait ? w : h;
   document.body.classList.toggle('short', logicalH < 560);
