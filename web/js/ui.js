@@ -82,6 +82,25 @@ function bindFullscreen() {
   applyFullscreenIcon();
 }
 
+/* 视口单位（竖屏时整屏旋转 90° 照样横屏玩） */
+export function applyLayoutUnits() {
+  const w = window.innerWidth, h = window.innerHeight;
+  const portrait = h >= w;
+  const root = document.documentElement;
+  root.style.setProperty('--uv', (h / 100) + 'px');
+  root.style.setProperty('--uh', (w / 100) + 'px');
+  document.body.classList.toggle('rotated', portrait);
+  const logicalH = portrait ? w : h;
+  document.body.classList.toggle('short', logicalH < 560);
+  document.body.classList.toggle('tiny', logicalH < 500);
+}
+export function bindLayout() {
+  applyLayoutUnits();
+  window.addEventListener('resize', applyLayoutUnits);
+  window.addEventListener('orientationchange', () => setTimeout(applyLayoutUnits, 150));
+}
+bindLayout();
+
 export function initTable(opts) {
   Object.assign(G, opts);
   G.selected = null;
@@ -95,6 +114,7 @@ export function initTable(opts) {
   const exit = document.getElementById('btn-exit');
   exit.onclick = () => { if (G.onExit) G.onExit(); };
   bindFullscreen();
+  bindLayout();
 }
 
 export function backToHome() {
@@ -270,11 +290,15 @@ function renderRiver(seat) {
   const box = document.getElementById('river-' + posOf(seat));
   box.innerHTML = '';
   const pendingSeat = s.phase === 'awaitingClaim' && s.pending ? s.pending.discarder : -1;
+  if (!G.prevRiver) G.prevRiver = {};
+  const prev = G.prevRiver[seat] || 0;
   p.river.forEach((raw, i) => {
     const t = tileEl(raw, { cls: 'mini' });
     if (seat === pendingSeat && i === p.river.length - 1) t.classList.add('raised');
+    if (i === p.river.length - 1 && p.river.length > prev) t.classList.add('drop-in');
     box.append(t);
   });
+  G.prevRiver[seat] = p.river.length;
 }
 
 function renderCore() {
@@ -354,18 +378,48 @@ function renderActions() {
 }
 
 /* ---------------- 听牌 ---------------- */
+function calcWaits(p) {
+  if (!p) return null;
+  const hand = p.hand.slice();
+  if (hand.some((t) => t === RED_RAW)) return null;
+  const meldCount = p.melds.length;
+  const waitLen = 13 - meldCount * 3;
+  if (hand.length === waitLen) {
+    const waits = waitingTiles(hand, meldCount);
+    return waits.length ? { mode: 'ting', waits } : null;
+  }
+  if (hand.length === waitLen + 1) {
+    let best = null;
+    for (const t of [...new Set(hand)]) {
+      const rest = hand.slice();
+      rest.splice(rest.indexOf(t), 1);
+      const w = waitingTiles(rest, meldCount);
+      if (w.length && (!best || w.length > best.waits.length)) best = { mode: 'discard', discard: t, waits: w };
+    }
+    return best;
+  }
+  return null;
+}
+
 function renderWaits() {
   const box = document.getElementById('waits');
   if (!box) return;
   const s = st();
   box.innerHTML = '';
-  const p = s.players[G.humanSeat];
-  if (!p || s.phase === 'finished') { box.classList.remove('show'); return; }
-  const waits = waitingTiles(p.hand, p.melds.length);
-  if (!waits.length) { box.classList.remove('show'); return; }
-  box.append(el('span', 'w-lbl', '听'));
-  for (const w of waits) box.append(el('span', 'w-tile', label(w)));
+  const p = s ? s.players[G.humanSeat] : null;
+  const r = s && s.phase !== 'finished' ? calcWaits(p) : null;
+  if (!r) { box.classList.remove('show'); return; }
+  const core = document.getElementById('core');
+  const badge = r.mode === 'ting' ? '已听牌' : '打 ' + label(r.discard) + ' 听';
+  box.append(el('span', 'w-lbl ting', badge));
+  for (const w of r.waits) box.append(el('span', 'w-tile', label(w)));
   box.classList.add('show');
+  if (core) {
+    const line = el('div', 'ting-line');
+    line.append(el('span', 't-badge', badge));
+    for (const w of r.waits) line.append(el('span', 't-tile', label(w)));
+    core.append(line);
+  }
 }
 
 /* ---------------- 计时 / 提示 ---------------- */
