@@ -44,19 +44,61 @@ function tileEl(raw, { cls = '', onClick = null } = {}) {
   return d;
 }
 
+/* ---------- 全屏 ---------- */
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function applyFullscreenIcon() {
+  const btn = document.getElementById('btn-full');
+  if (!btn) return;
+  const on = !!document.fullscreenElement || !!document.webkitFullscreenElement || isStandalone();
+  btn.textContent = on ? '⛶' : '⛶';
+  btn.title = on ? '退出全屏' : '全屏';
+}
+export function toggleFullscreen() {
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (isStandalone() || document.fullscreenElement) {
+    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    return;
+  }
+  if (req) {
+    req.call(el).then(applyFullscreenIcon).catch(() => iosFullscreenTip());
+  } else {
+    iosFullscreenTip();
+  }
+}
+let fullTipTimer = null;
+function iosFullscreenTip() {
+  showToast('iPhone 全屏：用 Safari 打开后点「分享」→「添加到主屏幕」，从桌面图标进入即可全屏', '', 6000);
+}
+function bindFullscreen() {
+  const btn = document.getElementById('btn-full');
+  if (btn) btn.addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', applyFullscreenIcon);
+  document.addEventListener('webkitfullscreenchange', applyFullscreenIcon);
+  applyFullscreenIcon();
+}
+
 export function initTable(opts) {
   Object.assign(G, opts);
   G.selected = null;
   G.timerFill = null;
   document.getElementById('home').classList.add('hidden');
+  const tip = document.getElementById('home-tip');
+  if (tip) tip.style.display = 'none';
   document.getElementById('table').classList.add('show');
   document.getElementById('result').classList.remove('show');
   document.getElementById('toast').innerHTML = '';
   const exit = document.getElementById('btn-exit');
   exit.onclick = () => { if (G.onExit) G.onExit(); };
+  bindFullscreen();
 }
 
 export function backToHome() {
+  const tip = document.getElementById('home-tip');
+  if (tip) tip.style.display = '';
   document.getElementById('home').classList.remove('hidden');
   document.getElementById('table').classList.remove('show');
   document.getElementById('result').classList.remove('show');
@@ -85,6 +127,7 @@ function renderSeat(seat) {
   const info = el('div', 'info' + (s.current === seat && s.phase !== 'finished' ? ' active' : ''));
   const row1 = el('div', 'row1');
   row1.append(el('span', 'wind', SEAT_LABEL[seat]), el('span', 'name', p.name));
+  if (s.current === seat && s.phase !== 'finished') row1.append(el('span', 'tag live', '出牌中'));
   if (p.isBot) row1.append(el('span', 'tag', '机器人'));
   if (seat === s.dealer) row1.append(el('span', 'tag dealer', '庄'));
   if (p.redsPlayed > 0) row1.append(el('span', 'tag red', '皮 ' + p.redsPlayed));
@@ -275,12 +318,12 @@ export function updateTimer(ratio) {
   G.timerFill.classList.toggle('run', ratio < 0.35);
 }
 
-export function showToast(text, cls = '') {
+export function showToast(text, cls = '', ms = 2000) {
   const box = document.getElementById('toast');
   const item = el('div', ('toast-item ' + cls).trim(), text);
   box.append(item);
-  setTimeout(() => { item.style.opacity = '0'; item.style.transition = 'opacity .25s'; }, 1600);
-  setTimeout(() => item.remove(), 2000);
+  setTimeout(() => { item.style.opacity = '0'; item.style.transition = 'opacity .25s'; }, Math.max(600, ms - 400));
+  setTimeout(() => item.remove(), ms);
 }
 
 export function clearToast() {

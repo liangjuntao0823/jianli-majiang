@@ -2,10 +2,16 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="监利红中">
+<meta name="theme-color" content="#0f3a31">
 <title>监利红中 · 网页版</title>
 <link rel="stylesheet" href="css/table.css">
 <link rel="icon" href="data:,">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%20%22%E7%9B%91%E5%88%A9%E7%BA%A2%E4%B8%AD%22%2C%20%22short_name%22%3A%20%22%E7%9B%91%E5%88%A9%E7%BA%A2%E4%B8%AD%22%2C%20%22start_url%22%3A%20%22.%22%2C%20%22display%22%3A%20%22fullscreen%22%2C%20%22background_color%22%3A%20%22%230f3a31%22%2C%20%22theme_color%22%3A%20%22%230f3a31%22%2C%20%22orientation%22%3A%20%22landscape%22%7D">
 </head>
 <body>
 
@@ -24,8 +30,11 @@
   </div>
 </div>
 
+<div id="home-tip">手机全屏：用 Safari 打开本页 → 点「分享」→「添加到主屏幕」，从桌面图标进入即无地址栏全屏</div>
+
 <div id="table">
   <div id="topbar">
+    <button class="icon-btn" id="btn-full" title="全屏">⛶</button>
     <button class="icon-btn" id="btn-exit" title="退出">✕</button>
   </div>
 

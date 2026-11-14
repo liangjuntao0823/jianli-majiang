@@ -141,7 +141,21 @@ body::after {
 .info .score { font-size: clamp(13px, 2vh, 18px); font-weight: 800; color: var(--ink); }
 .info .score.neg { color: #ff9c8a; }
 .info .score.pos { color: #ffe08a; }
-.info.active { border-color: var(--gold); box-shadow: 0 0 0 1.5px rgba(233,196,106,0.55), 0 6px 22px rgba(0,0,0,0.45); }
+.info.active {
+  border-color: var(--gold);
+  animation: seatPulse 1.5s ease-in-out infinite;
+}
+@keyframes seatPulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(233,196,106,0.8), 0 0 14px rgba(233,196,106,0.35); }
+  50%      { box-shadow: 0 0 0 3px rgba(233,196,106,1),   0 0 30px rgba(233,196,106,0.8); }
+}
+.info .tag.live {
+  color: #12211d; background: linear-gradient(180deg, #ffe6a3, var(--gold));
+  border-color: transparent; font-weight: 700; letter-spacing: 0.02em;
+  animation: liveBlink 1.1s steps(2, end) infinite;
+}
+@keyframes liveBlink { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+.info.active .timer-track { height: 5px; box-shadow: 0 0 8px rgba(233,196,106,0.45); }
 .info .timer-track { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.12); overflow: hidden; margin-top: 3px; }
 .info .timer-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 2px; transition: width 0.1s linear; }
 .info .timer-fill.run { background: linear-gradient(90deg, #ff8f6b, var(--gold)); }
@@ -284,7 +298,7 @@ body::after {
 /* 牌河 */
 .river { position: absolute; display: grid; gap: 3px; }
 .river.self { left: 50%; transform: translateX(-50%); bottom: 1vh; grid-template-columns: repeat(9, auto); justify-content: center; }
-.river.top { left: 50%; transform: translateX(-50%) rotate(180deg); top: 1.6vh; grid-template-columns: repeat(9, auto); }
+.river.top { left: 50%; transform: translateX(-50%); top: 1.6vh; grid-template-columns: repeat(9, auto); }
 .river.left { left: 1.2vw; top: 50%; transform: translateY(-50%); grid-template-columns: repeat(3, auto); }
 .river.right { right: 1.2vw; top: 50%; transform: translateY(-50%); grid-template-columns: repeat(3, auto); }
 
@@ -332,8 +346,8 @@ body::after {
 /* toast */
 #toast {
   position: absolute;
-  right: 1.6vw; top: 6.5vh;
-  display: flex; flex-direction: column; gap: 6px; align-items: flex-end;
+  left: 50%; transform: translateX(-50%); bottom: 22vh; top: auto;
+  display: flex; flex-direction: column; gap: 6px; align-items: center;
   z-index: 20;
   pointer-events: none;
 }
@@ -522,3 +536,19 @@ body::after {
   .core .num { font-size: clamp(26px, 8vh, 40px); }
   .core .unit { font-size: 10px; }
 }
+
+
+/* 全屏按钮 & 刘海安全区 */
+#btn-full { margin-right: 8px; font-size: clamp(13px, 2.2vh, 17px); line-height: 1; }
+#topbar { padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); }
+@media (display-mode: standalone) {
+  #btn-full { display: none; }
+}
+
+#home-tip {
+  position: fixed; left: 0; right: 0; bottom: 14px;
+  text-align: center; font-size: clamp(10px, 1.6vh, 13px);
+  color: rgba(240,215,155,0.55); letter-spacing: 0.02em; z-index: 31;
+  padding: 0 16px env(safe-area-inset-bottom);
+}
+@media (display-mode: standalone) { #home-tip { display: none; } }
