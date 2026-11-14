@@ -202,6 +202,44 @@ export function renderAll() {
   renderWaits();
 }
 
+/* 出牌飞行：从出牌者的手牌区飞到牌河落点，慢速看得清是谁在打 */
+function flyDiscard(seat, raw, targetEl) {
+  if (!targetEl) return;
+  if (document.body.classList.contains('rotated')) return;   // 竖屏旋转模式用原地 dropIn
+  const table = document.getElementById('table');
+  if (!table) return;
+  const pos = posOf(seat);
+  const fromEl = seat === G.humanSeat
+    ? document.querySelector('.hand-zone')
+    : document.querySelector('.seat.' + pos + ' .opp-hand');
+  if (!fromEl) return;
+  const tr = table.getBoundingClientRect();
+  const fr = fromEl.getBoundingClientRect();
+  const dr = targetEl.getBoundingClientRect();
+  const W = targetEl.offsetWidth || 34, H = targetEl.offsetHeight || 48;
+  const sx = fr.left + fr.width / 2 - tr.left - W / 2;
+  const sy = fr.top + fr.height / 2 - tr.top - H / 2;
+  const ex = dr.left + dr.width / 2 - tr.left - W / 2;
+  const ey = dr.top + dr.height / 2 - tr.top - H / 2;
+
+  const fly = tileEl(raw, { cls: 'flying' });
+  fly.style.width = W + 'px';
+  fly.style.height = H + 'px';
+  fly.style.left = sx + 'px';
+  fly.style.top = sy + 'px';
+  table.append(fly);
+  targetEl.style.opacity = '0';
+
+  const anim = fly.animate([
+    { left: sx + 'px', top: sy + 'px', transform: 'scale(1.75)', opacity: 0.9 },
+    { left: (sx + ex) / 2 + 'px', top: Math.min(sy, ey) - 40 + 'px', transform: 'scale(1.55)', opacity: 1, offset: 0.55 },
+    { left: ex + 'px', top: ey + 'px', transform: 'scale(1)', opacity: 1 },
+  ], { duration: 560, easing: 'cubic-bezier(.22,.75,.3,1)', fill: 'forwards' });
+  const finish = () => { fly.remove(); targetEl.style.opacity = ''; targetEl.classList.remove('drop-in'); };
+  anim.onfinish = finish;
+  anim.oncancel = finish;
+}
+
 function renderSeat(seat) {
   const s = st();
   const p = s.players[seat];
@@ -249,21 +287,20 @@ function meldGroupEl(m) {
   const g = el('div', 'meld-group' + (m.kind && m.kind.startsWith('gang') ? ' gang' : ''));
   const face = () => tileEl(m.tile, { cls: 'meld' });
   const back = () => el('div', 'tile hand-back meld');
+  const stack = (node) => {
+    const st4 = el('div', 'stack');
+    st4.append(node);
+    return st4;
+  };
   if (m.kind === 'gangConcealed') {
-    g.append(back(), back(), back());
-    const st4 = el('div', 'stack');
-    st4.append(face());
-    g.append(st4);
+    // 暗杠：下面 3 张盖着，上面 1 张明牌，居中
+    g.append(back(), back(), back(), stack(face()));
   } else if (m.kind === 'gangExposed') {
-    g.append(face(), face(), face());
-    const st4 = el('div', 'stack');
-    st4.append(back());
-    g.append(st4);
+    // 明杠：4 张全明，第 4 张压在中间那张上方
+    g.append(face(), face(), face(), stack(face()));
   } else if (m.kind === 'gangAdded') {
-    g.append(face(), face(), face());
-    const st4 = el('div', 'stack');
-    st4.append(face());
-    g.append(st4);
+    // 回头笑：下面 3 张明，上面 1 张暗，居中
+    g.append(face(), face(), face(), stack(back()));
   } else {
     g.append(face(), face(), face());
   }
@@ -378,8 +415,10 @@ function renderRiver(seat) {
         }
       }
     }
-    if (i === p.river.length - 1 && p.river.length > prev) t.classList.add('drop-in');
+    const isNew = i === p.river.length - 1 && p.river.length > prev;
+    if (isNew) t.classList.add('drop-in');
     box.append(t);
+    if (isNew) requestAnimationFrame(() => flyDiscard(seat, raw, t));
   });
   G.prevRiver[seat] = p.river.length;
 }
@@ -487,22 +526,34 @@ function calcWaits(p) {
 function renderWaits() {
   const box = document.getElementById('waits');
   if (!box) return;
-  const s = st();
   box.innerHTML = '';
-  const p = s ? s.players[G.humanSeat] : null;
-  const r = s && s.phase !== 'finished' ? calcWaits(p) : null;
-  if (!r) { box.classList.remove('show'); return; }
-  const core = document.getElementById('core');
-  const badge = r.mode === 'ting' ? '已听牌' : '打 ' + label(r.discard) + ' 听';
-  box.append(el('span', 'w-lbl ting', badge));
-  for (const w of r.waits) box.append(el('span', 'w-tile', label(w)));
-  box.classList.add('show');
-  if (core) {
-    const line = el('div', 'ting-line');
-    line.append(el('span', 't-badge', badge));
-    for (const w of r.waits) line.append(el('span', 't-tile', label(w)));
-    core.append(line);
+  const s = st();
+  box.classList.remove('show');
+  if (!s || s.phase === 'finished') return;
+  const p = s.players[G.humanSeat];
+  if (!p) return;
+
+  // 选中了某张牌 → 算“打这张之后听什么”；没选中 → 13 张已听牌就显示当前听的牌
+  let waits = null;
+  let badge = '';
+  if (G.selected) {
+    const rest = p.hand.slice();
+    const idx = rest.indexOf(G.selected.raw);
+    if (idx >= 0) rest.splice(idx, 1);
+    const w = waitingTiles(rest, p.melds.length);
+    if (w.length) { waits = w; badge = '胡'; }
   }
+  if (!waits) {
+    const r = calcWaits(p);
+    if (r && r.mode === 'ting') { waits = r.waits; badge = '已听牌'; }
+  }
+  if (!waits || !waits.length) return;
+
+  box.append(el('div', 'w-head', badge));
+  const tiles = el('div', 'w-tiles');
+  for (const w of waits) tiles.append(tileEl(w, { cls: 'w-mini' }));
+  box.append(tiles);
+  box.classList.add('show');
 }
 
 /* ---------------- 计时 / 提示 ---------------- */
