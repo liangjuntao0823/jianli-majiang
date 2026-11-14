@@ -422,7 +422,14 @@ function renderWalls() {
     const p = s.players[seat];
     const n = p.handCount !== undefined ? p.handCount : p.hand.length;
     if (pos === 'bottom') continue;   // 自己这面不摆牌墙，手牌就是自己的牌
-    for (let i = 0; i < n; i++) layer.append(el('div', 'tile wall-back'));
+    // 两面平行牌墙：外侧绿背、内侧白面，做出真实牌墙的厚度
+    const outer = el('div', 'wl outer');
+    const inner = el('div', 'wl inner');
+    for (let i = 0; i < n; i++) {
+      outer.append(el('div', 'tile wall-back green'));
+      inner.append(el('div', 'tile wall-back'));
+    }
+    layer.append(outer, inner);
   }
 }
 

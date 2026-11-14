@@ -1487,3 +1487,187 @@ body.rotated #wall-left { bottom: calc(26 * var(--uv)); }
 @media (min-height: 561px) {
   .seat.left .meld-row, .seat.right .meld-row { top: calc(34 * var(--uv)); }
 }
+
+/* ==================================================================
+   v8：真实牌桌 —— 木纹桌框 / 绒面凹陷 / 四家牌河各自朝向
+   ================================================================== */
+
+/* 木纹桌框（条纹拼板） */
+#table {
+  border: calc(2.9 * var(--uv)) solid transparent;
+  border-image: repeating-linear-gradient(
+    94deg,
+    #5d3218 0 5px, #7a4526 5px 9px, #4e2a14 9px 14px, #6b3c20 14px 18px
+  ) 1;
+  box-shadow:
+    inset 0 0 calc(18 * var(--uv)) calc(5 * var(--uv)) rgba(0,0,0,0.62),
+    inset 0 0 0 calc(0.35 * var(--uv)) rgba(0,0,0,0.55),
+    0 0 0 calc(0.6 * var(--uv)) rgba(0,0,0,0.5);
+}
+/* 台面：绒布噪点 + 中央亮、四周暗 */
+#table::after {
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.020) 0 1px, rgba(0,0,0,0.012) 1px 3px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,0.020) 0 1px, rgba(255,255,255,0.012) 1px 3px);
+  mix-blend-mode: overlay;
+  opacity: 1;
+}
+/* 内框装饰线（木框与台面交界） */
+#table::before {
+  inset: calc(-0.9 * var(--uv));
+  border: 1px solid rgba(255,220,160,0.22);
+  box-shadow: inset 0 0 calc(3 * var(--uv)) rgba(0,0,0,0.6);
+}
+
+/* 牌河：各家牌面朝自己 */
+.river.top { transform: translateX(-50%) rotate(180deg); }
+.river.left { transform: translateY(-50%) rotate(90deg); }
+.river.right { transform: translateY(-50%) rotate(-90deg); }
+
+/* 副露 / 皮子同样朝自己 */
+.seat.top .meld-row { transform: rotate(180deg); }
+.seat.left .meld-row { transform: translateX(-50%) rotate(90deg); }
+.seat.right .meld-row { transform: translateX(-50%) rotate(-90deg); }
+
+/* 牌墙：更厚的立牌（顶部高光 + 绿色侧面 + 分隔缝） */
+.wall-layer { gap: calc(-0.1 * var(--uv)) !important; }
+.tile.wall-back {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.10) 0%, rgba(255,255,255,0.55) 8%, rgba(255,255,255,0.9) 22%, rgba(255,255,255,0.25) 58%, rgba(0,0,0,0.10) 100%),
+    linear-gradient(178deg, #fffdf7 0%, #f1ece0 55%, #e2ddce 100%);
+  border-bottom: calc(var(--wall-w) * 0.20) solid #1b7c5e;
+  border-right: 1px solid rgba(90,85,60,0.28);
+  box-shadow:
+    0 calc(var(--wall-w) * 0.08) calc(var(--wall-w) * 0.14) rgba(0,0,0,0.42),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+}
+
+/* 中央水印换成自己的字样 */
+#center::after { content: '监利红中'; }
+
+/* ---------- 左右家副露：以座位中心旋转，别甩到中间 ---------- */
+.seat.left .meld-row {
+  left: 50%;
+  top: calc(58 * var(--uv));
+  transform: translate(-50%, -50%) rotate(90deg);
+  transform-origin: center center;
+}
+.seat.right .meld-row {
+  left: 50%;
+  top: calc(58 * var(--uv));
+  transform: translate(-50%, -50%) rotate(-90deg);
+  transform-origin: center center;
+}
+
+/* 木纹调深、纹理更细 */
+#table {
+  border-image: repeating-linear-gradient(
+    92deg,
+    #4a2614 0 3px, #63381d 3px 7px, #3d1f10 7px 11px, #57301a 11px 15px
+  ) 1;
+}
+
+/* ==================================================================
+   v8：真实麻将机牌桌 —— 双排立牌墙 / 牌河面朝各家 / 台面 2.5D
+   ================================================================== */
+
+/* 牌河：每家的牌朝自己 */
+.river.top { transform: translateX(-50%); }
+.river.left { transform: translateY(-50%); }
+.river.right { transform: translateY(-50%); }
+.river.top .tile { transform: rotate(180deg); }
+.river.left .tile { transform: rotate(90deg); }
+.river.right .tile { transform: rotate(-90deg); }
+.river.top .tile.raised,
+.river.left .tile.raised,
+.river.right .tile.raised { transform-origin: 50% 50%; }
+.river.left .tile.raised { transform: rotate(90deg) translateY(-8%) scale(1.06); }
+.river.right .tile.raised { transform: rotate(-90deg) translateY(-8%) scale(1.06); }
+.river.top .tile.raised { transform: rotate(180deg) translateY(-8%) scale(1.06); }
+
+/* 双排牌墙 */
+#wall-top, #wall-left, #wall-right { gap: calc(0.28 * var(--uv)); }
+#wall-top { flex-direction: column; align-items: center; }
+#wall-left, #wall-right { flex-direction: row; align-items: flex-start; }
+.wl { display: flex; gap: calc(0.10 * var(--uv)); }
+#wall-top .wl { flex-direction: row; }
+#wall-left .wl, #wall-right .wl { flex-direction: column; }
+.tile.wall-back.green {
+  background: linear-gradient(178deg, #2a9474 0%, #1c7c60 52%, #14624c 100%);
+  border-bottom: calc(var(--wall-w) * 0.17) solid #0d4a38;
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 calc(var(--wall-w) * 0.10) calc(var(--wall-w) * 0.16) rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* 台面：2.5D 深绿 + 斜面木框 */
+#table {
+  border: calc(3.2 * var(--uv)) solid #4b2a18;
+  background:
+    radial-gradient(70% 58% at 50% 44%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 66%),
+    radial-gradient(128% 108% at 50% 44%, #16786a 0%, #0d6156 42%, #084a41 76%, #05322b 100%);
+  box-shadow:
+    inset 0 calc(1.2 * var(--uv)) calc(3 * var(--uv)) rgba(0,0,0,0.7),
+    inset 0 calc(-0.6 * var(--uv)) calc(2 * var(--uv)) rgba(255,255,255,0.06),
+    0 0 0 2px rgba(255,214,150,0.14),
+    0 0 calc(4 * var(--uv)) rgba(0,0,0,0.6);
+}
+#table::before {
+  border: none;
+  inset: calc(-2.4 * var(--uv));
+  border-radius: calc(2 * var(--uv));
+  background:
+    linear-gradient(160deg, #7a4a2a 0%, #5b3419 28%, #8a5631 52%, #432313 78%, #6d4224 100%);
+  box-shadow:
+    inset 0 calc(0.8 * var(--uv)) calc(1.6 * var(--uv)) rgba(255,230,190,0.18),
+    inset 0 calc(-1.2 * var(--uv)) calc(2 * var(--uv)) rgba(0,0,0,0.7);
+  z-index: -1;
+}
+#table::after {
+  background-image:
+    repeating-linear-gradient(88deg, rgba(0,0,0,0.05) 0 2px, rgba(255,255,255,0.02) 2px 7px);
+  mix-blend-mode: overlay;
+}
+
+/* 计时只在中央显示，信息牌不再挂条 */
+.info .timer-track { display: none; }
+
+/* ---------- v8 修正 ---------- */
+/* 木框：直接用边框，不再铺满伪元素 */
+#table::before { display: none; }
+#table {
+  border: calc(3.4 * var(--uv)) solid #523020;
+  box-shadow:
+    inset 0 calc(1.4 * var(--uv)) calc(3.4 * var(--uv)) rgba(0,0,0,0.72),
+    inset 0 calc(-0.8 * var(--uv)) calc(2.4 * var(--uv)) rgba(255,255,255,0.05),
+    0 0 0 calc(0.5 * var(--uv)) #7d5232,
+    0 0 0 calc(0.9 * var(--uv)) #2c1810,
+    0 0 calc(5 * var(--uv)) rgba(0,0,0,0.65);
+}
+/* 绿背牌压暗、去饱和，别抢眼 */
+.tile.wall-back.green {
+  background: linear-gradient(178deg, #2c8a6d 0%, #217058 52%, #175744 100%);
+  border-bottom: calc(var(--wall-w) * 0.17) solid #103f31;
+}
+/* 左右牌河旋转后给足列间距，避免叠在一起 */
+.river.left, .river.right { grid-template-columns: repeat(3, auto) !important; column-gap: calc(1.5 * var(--uv)); row-gap: calc(0.9 * var(--uv)); }
+.river.top { row-gap: calc(0.9 * var(--uv)); }
+
+/* 副露里 4 张牌尺寸统一（原来叠上去那张按牌河尺寸，明显偏大） */
+.meld-group > .tile,
+.meld-group > .stack > .tile { width: var(--meld-w); height: var(--meld-h); }
+.meld-group > .tile img,
+.meld-group > .stack > .tile img { width: 100%; height: 100%; border-radius: inherit; }
+.meld-group > .stack { top: calc(var(--meld-h) * -0.30); }
+
+/* 事件大字：挪到台面中上部，别压住顶墙 */
+#event { background: none; padding: 0; }
+#event .ev-box {
+  position: absolute; top: calc(32.5 * var(--uv)); left: 50%;
+  transform: translateX(-50%) !important;
+  padding: calc(0.4 * var(--uv)) calc(2 * var(--uv));
+  background: rgba(6, 32, 26, 0.72); border-radius: calc(0.9 * var(--uv));
+}
+#event .ev-main { font-size: calc(3.2 * var(--uv)) !important; }
