@@ -374,8 +374,9 @@ function renderMyHand(box, seat) {
   const mid = (n - 1) / 2;
   kids.forEach((t, i) => {
     const off = i - mid;
-    t.style.setProperty('--rot', (off * 0.5).toFixed(2) + 'deg');
-    t.style.setProperty('--lift', (off * off * 0.1).toFixed(1) + 'px');
+    // 手牌保持竖直平铺（不做扇形倾斜）
+    t.style.setProperty('--rot', '0deg');
+    t.style.setProperty('--lift', '0px');
     t.style.setProperty('--z', String(i));
   });
   box.append(zone);
