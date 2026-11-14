@@ -421,16 +421,8 @@ function renderWalls() {
     if (!layer) continue;
     const p = s.players[seat];
     const n = p.handCount !== undefined ? p.handCount : p.hand.length;
-    if (pos === 'bottom') {
-      const half = Math.ceil(n / 2);
-      const a = el('div', 'wseg');
-      const b = el('div', 'wseg');
-      for (let i = 0; i < half; i++) a.append(el('div', 'tile wall-back'));
-      for (let i = half; i < n; i++) b.append(el('div', 'tile wall-back'));
-      layer.append(a, b);
-    } else {
-      for (let i = 0; i < n; i++) layer.append(el('div', 'tile wall-back'));
-    }
+    if (pos === 'bottom') continue;   // 自己这面不摆牌墙，手牌就是自己的牌
+    for (let i = 0; i < n; i++) layer.append(el('div', 'tile wall-back'));
   }
 }
 
@@ -468,16 +460,17 @@ function renderCore() {
   core.innerHTML = '';
   const dial = el('div', 'dial');
 
-  // 指向庄家的绿色三角
-  const dealerPos = posOf(s.dealer);
-  const tri = el('div', 'dial-tri ' + dealerPos);
+  // 绿色三角：指向当前出牌/该行动的玩家
+  const live = (s.phase !== 'finished' && s.current !== null && s.current !== undefined) ? s.current : s.dealer;
+  const livePos = posOf(live);
+  const tri = el('div', 'dial-tri ' + livePos);
   dial.append(tri);
 
   // 四方位
   const dirs = [['北', 'top'], ['南', 'bottom'], ['西', 'left'], ['东', 'right']];
   for (const [txt, side] of dirs) {
     const d = el('span', 'dial-dir ' + side, txt);
-    if (side === dealerPos) d.classList.add('is-dealer');
+    if (side === livePos) d.classList.add('is-dealer');
     dial.append(d);
   }
 
