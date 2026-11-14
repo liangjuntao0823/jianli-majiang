@@ -1671,3 +1671,80 @@ body.rotated #wall-left { bottom: calc(26 * var(--uv)); }
   background: rgba(6, 32, 26, 0.72); border-radius: calc(0.9 * var(--uv));
 }
 #event .ev-main { font-size: calc(3.2 * var(--uv)) !important; }
+
+/* ==================================================================
+   v9：真 2.5D —— 整桌透视俯视，近大远小
+   ================================================================== */
+#table { overflow: hidden; }
+#board {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  transform: perspective(2100px) rotateX(9deg) scale(1.015);
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+/* 远的层往后推，产生近大远小 */
+/* 远端的元素顺势收一点，形成近大远小 */
+#wall-top, #wall-left, #wall-right { transform: scaleY(0.94); transform-origin: center bottom; }
+.seat.top .avatar, .seat.left .avatar, .seat.right .avatar { transform: scale(0.92); }
+.seat.top, .seat.left, .seat.right { transform-origin: center bottom; }
+
+/* 台面加深，配合俯视有落差 */
+#table {
+  box-shadow:
+    inset 0 calc(3 * var(--uv)) calc(6 * var(--uv)) rgba(0,0,0,0.55),
+    0 calc(-1 * var(--uv)) 0 #9a6a41 inset;
+}
+
+/* 木框不等宽：上窄下宽，俯视桌面的透视暗示 */
+#table {
+  border-width: calc(1.7 * var(--uv)) calc(2.4 * var(--uv)) calc(3.6 * var(--uv)) calc(2.4 * var(--uv));
+  border-style: solid;
+  border-color: #4a2417;
+  border-image: linear-gradient(158deg, #a06a3d 0%, #6a3c1f 26%, #94592f 52%, #522a13 78%, #34180b 100%) 1;
+}
+/* 台面纵深：远端压暗、近端提亮 */
+#table {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.34) 0%, rgba(0,0,0,0.10) 9%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 68%, rgba(0,0,0,0.16) 100%),
+    radial-gradient(52% 46% at 50% 40%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 70%),
+    radial-gradient(128% 108% at 50% 44%, #1d7c6d 0%, #136a5e 38%, #0c5045 74%, #05342c 100%);
+}
+
+/* 牌墙牌改成"顶面视角"：细长条 + 侧立面，整墙才像立起来的真牌 */
+:root {
+  --wall-w: clamp(9px, calc(1.28 * var(--uh)), 20px);
+  --wall-h: calc(var(--wall-w) * 2.55);
+}
+.tile.wall-back, .tile.wall-face {
+  border-radius: calc(var(--wall-w) * 0.16);
+  box-shadow:
+    inset 0 calc(var(--wall-w) * 0.10) 0 rgba(255,255,255,0.34),
+    inset 0 calc(var(--wall-w) * -0.12) 0 rgba(0,0,0,0.35),
+    calc(var(--wall-w) * 0.18) calc(var(--wall-w) * 0.16) calc(var(--wall-w) * 0.22) rgba(0,0,0,0.5);
+}
+.tile.wall-back.green {
+  background: linear-gradient(96deg, #2f9070 0%, #1e6d55 42%, #14503e 100%);
+  border-bottom: none;
+}
+#wall-top .wrow, #wall-top .wl { gap: calc(var(--wall-w) * 0.10); }
+
+:root {
+  --wall-w: clamp(10px, calc(1.52 * var(--uh)), 22px);
+  --wall-h: calc(var(--wall-w) * 2.15);
+}
+#wall-left, #wall-right { overflow: hidden; }
+#wall-left .wrow, #wall-right .wrow { gap: calc(var(--wall-w) * 0.08); }
+/* 内侧那排（白面）压在墙里，略暗 */
+.tile.wall-face { filter: brightness(0.93) saturate(0.95); }
+
+/* 内侧那排其实只是墙的内侧立面：压扁变暗，不再是一排白牌 */
+.tile.wall-face {
+  transform: scaleY(0.42);
+  transform-origin: top center;
+  filter: brightness(0.52) saturate(0.55);
+}
+#wall-left .tile.wall-face, #wall-right .tile.wall-face {
+  transform: scaleX(0.42);
+  transform-origin: left center;
+}
