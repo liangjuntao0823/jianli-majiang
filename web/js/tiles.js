@@ -18,7 +18,10 @@ export function label(raw) {
 }
 
 /** 单文件构建时由构建脚本填充为 base64 data URI */
-export const TILE_SRC = {};
+import { TILE_SRC as ART_SRC } from './tileArt.js';
+
+/** 牌面图：内联 base64（js/tileArt.js），保证任何环境都能显示 */
+export const TILE_SRC = ART_SRC;
 
 /** 牌面图片名，对应 assets/tiles/<name>.png */
 export function tileSrc(raw) {

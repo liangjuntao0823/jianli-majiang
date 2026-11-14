@@ -20,23 +20,13 @@ TILE_NAMES = (
     + ["Chun"]
 )
 
-def build_tile_map():
-    # 牌面已改为 js/tileArt.js 里的内联矢量图，不再内联 PNG
-    return "{}"
-
 def main():
-    src_tiles = (WEB / "js" / "tiles.js").read_text(encoding="utf-8")
-    tile_map = build_tile_map()
-    patched_tiles = src_tiles.replace("export const TILE_SRC = {};", f"export const TILE_SRC = {tile_map};")
-    if "export const TILE_SRC = {};" in src_tiles:
-        pass
-    elif "export const TILE_SRC = {" not in src_tiles:
-        raise SystemExit("tiles.js 里找不到 TILE_SRC 占位")
+    # 牌面已内联在 js/tileArt.js，无需替换占位
+    patched_tiles = None
 
     # 用临时目录做一份带内联图表的 src，再交给 esbuild
     tmp = Path(tempfile.mkdtemp(prefix="jianli-build-"))
     shutil.copytree(WEB / "js", tmp / "js")
-    (tmp / "js" / "tiles.js").write_text(patched_tiles, encoding="utf-8")
 
     out_js = tmp / "app.js"
     cmd = [
